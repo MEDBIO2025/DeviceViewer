@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Medical Device Scanner</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .login-container {
+      background-color: #fff;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 420px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 1.75rem;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #34495e;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.85rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      background-color: #3498db;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1.25rem;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 6px;
+      background-color: rgba(231, 76, 60, 0.1);
+      display: none;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .logo img {
+      height: 60px;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .forgot-password a {
+      color: #7f8c8d;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+      color: #3498db;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <img     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsIz5ldp6L3p2gzRI_1AQ2xxSIpx1xuYby5A&s" 
+ alt="Company Logo">
+    </div>
+    <h2>Medical Device Portal</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" />
+      </div>
+      <div class="forgot-password">
+        <a href="#" id="forgotPassword">Forgot password?</a>
+      </div>
+      <button type="submit" id="loginButton">
+        <span id="buttonText">Login</span>
+        <span id="spinner" style="display: none;">⌛</span>
+      </button>
+      <div class="error-message" id="errorMsg"></div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('loginForm');
+      const errorMsg = document.getElementById('errorMsg');
+      const loginButton = document.getElementById('loginButton');
+      const buttonText = document.getElementById('buttonText');
+      const spinner = document.getElementById('spinner');
+      
+      // Check for returnTo parameter in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnTo = urlParams.get('returnTo') || '/';
+
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        // Show loading state
+        buttonText.style.display = 'none';
+        spinner.style.display = 'inline';
+        loginButton.disabled = true;
+        errorMsg.style.display = 'none';
+
+        try {
+          const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+
+          const result = await res.json();
+          
+          if (res.ok) {
+            // Redirect to original requested page or home
+            window.location.href = returnTo;
+          } else {
+            errorMsg.textContent = result.message || 'Invalid username or password';
+            errorMsg.style.display = 'block';
+            document.getElementById('password').value = '';
+            document.getElementById('password').focus();
+          }
+        } catch (err) {
+          errorMsg.textContent = 'Network error. Please try again.';
+          errorMsg.style.display = 'block';
+        } finally {
+          // Reset button state
+          buttonText.style.display = 'inline';
+          spinner.style.display = 'none';
+          loginButton.disabled = false;
+        }
+      });
+
+      // Forgot password functionality
+      document.getElementById('forgotPassword').addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Please contact your system administrator to reset your password.');
+      });
+
+      // Focus username field on page load
+      document.getElementById('username').focus();
+    });
+  </script>
+</body>
+</html>

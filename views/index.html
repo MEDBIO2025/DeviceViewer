@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical Device Scanner</title>
+  <style>
+    
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+      color: #333;
+    }
+    h2 {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+    
+    header {
+      background: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+    }
+    nav a {
+      margin-left: 1.5rem;
+      text-decoration: none;
+      color: #333;
+      font-weight: 600;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow-x: auto; /* allow horizontal scroll if needed */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      min-width: 700px; /* keep table wide enough */
+      table-layout: fixed;
+      word-wrap: break-word;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+    th { background: #f0f8ff; }
+    tr.selected { background: #d4edda; }
+    tr.unselected { background: #f8d7da; }
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .autocomplete-list div { cursor: pointer; padding: 0.6rem; }
+    .autocomplete-list div:hover { background: #f0f8ff; }
+    .form-group { margin-bottom: 1.5rem; position: relative; }
+    .button-group { margin-top: 1rem; text-align: center; }
+    button {
+      margin: 0 0.5rem;
+      background: #0078d4;
+      color: white;
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover { background: #005ea1; }
+    textarea.notes-input {
+      width: 100%;
+      resize: vertical;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-height: 50px;
+      font-size: 0.9rem;
+      padding: 5px;
+      font-family: inherit;
+    }
+    td.editable {
+      cursor: text;
+      background: #fffbea;
+      overflow-wrap: break-word;
+    }
+    td.editable:focus {
+      outline: 2px solid #0078d4;
+      background: #e0f0ff;
+    }
+    button.delete-btn {
+      background: #dc3545;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      margin: 0;
+    }
+    button.delete-btn:hover {
+      background: #a71d2a;
+    }
+
+    /* Mobile tweaks: keep horizontal table but scale font and allow scroll */
+    @media (max-width: 768px) {
+      body, .container {
+        padding: 1rem;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+      }
+      nav a {
+        margin-left: 0;
+        margin-right: 1rem;
+      }
+      table {
+        min-width: 600px;
+        font-size: 0.85rem;
+      }
+      th, td {
+        padding: 0.4rem 0.5rem;
+      }
+      button {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+      }
+      textarea.notes-input {
+        min-height: 40px;
+        font-size: 0.85rem;
+      }
+    }
+    @media (max-width: 480px) {
+      table {
+        min-width: 500px;
+        font-size: 0.8rem;
+      }
+      th, td {
+        padding: 0.3rem 0.4rem;
+      }
+      button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+      }
+      textarea.notes-input {
+        min-height: 35px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body><header style="
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  padding: 1rem 2rem; 
+  background: #fff; 
+  border-bottom: 1px solid #ddd;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  position: relative;
+  height: 60px;
+">
+  <img 
+    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsIz5ldp6L3p2gzRI_1AQ2xxSIpx1xuYby5A&s" 
+    alt="Logo" 
+    style="height: 55px; object-fit: contain;"
+  />
+
+  <a 
+    href="https://medicaldevicescanner.onrender.com" 
+    target="_blank" 
+    rel="noopener" 
+    style="
+      position: absolute;
+      right: 0.5rem;
+      top: 8px;
+      font-weight: 600; 
+      font-size: 0.85rem; 
+      color: #555;
+      background-color: #e0e0e0;
+      padding: 0.2rem 0.2rem;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    "
+    onmouseover="this.style.backgroundColor='#cfcfcf';"
+    onmouseout="this.style.backgroundColor='#e0e0e0';"
+  >
+    New Clinics
+  </a>
+</header>
+
+
+
+<div class="container">
+  <h2>Medical Device Viewer</h2>
+
+  <div class="form-group">
+    <label for="clinicSearch">Search Clinic:</label>
+    <input type="text" id="clinicSearch" placeholder="Type to search..." oninput="filterSuggestions()">
+    <div id="autocompleteResults" class="autocomplete-list"></div>
+  </div>
+
+  <div class="form-group">
+    <label for="subFolder">Select Subfolder:</label>
+    <select id="subFolder" onchange="loadExcel()" disabled>
+      <option disabled selected>Select a clinic first</option>
+    </select>
+  </div>
+
+  <div class="button-group">
+    <button onclick="addRow()">Add New Row</button>
+    <button onclick="saveSelected()">Save Selected</button>
+  </div>
+
+  <div id="loadingMessage"></div>
+  <div id="excelTable"></div>
+</div>
+
+<script>
+let allClientFolders = [];
+let rowsData = [];
+
+const HEADER_LABELS = {
+  device_type: 'Device Type',
+  manufacturer: 'Manufacturer',
+  model: 'Model',
+  serial: 'Serial Number',
+  notes: 'Notes'
+};
+
+async function loadClientFolders() {
+  const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020`);
+  const folders = await res.json();
+  allClientFolders = folders;
+}
+
+function filterSuggestions() {
+  const input = document.getElementById('clinicSearch').value.toLowerCase();
+  const results = document.getElementById('autocompleteResults');
+  results.innerHTML = '';
+  allClientFolders.filter(f => f.toLowerCase().includes(input)).slice(0, 10).forEach(name => {
+    const div = document.createElement('div');
+    div.textContent = name;
+    div.onclick = () => {
+      document.getElementById('clinicSearch').value = name;
+      loadSubfolders(name);
+      results.innerHTML = '';
+    };
+    results.appendChild(div);
+  });
+}
+
+async function loadSubfolders(clientFolder) {
+  const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020/${clientFolder}`);
+  const folders = await res.json();
+  const select = document.getElementById('subFolder');
+  select.innerHTML = '<option disabled selected>Select a subfolder</option>';
+  folders.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = `${clientFolder}/${f}`;
+    opt.textContent = f;
+    select.appendChild(opt);
+  });
+  select.disabled = false;
+}
+
+async function loadExcel() {
+  const path = document.getElementById('subFolder').value;
+  if (!path) return;
+  const res = await fetch(`/api/excel-data?folderName=${encodeURIComponent(path)}`);
+  const data = await res.json();
+  
+  rowsData = data.rows.map(row => {
+    const cleanRow = {};
+    for (const key in row) {
+      if (!key.toLowerCase().includes('duplicate')) { 
+        cleanRow[key] = row[key];
+      }
+    }
+    if (!('notes' in cleanRow)) cleanRow.notes = '';
+    if (!('selected' in cleanRow)) cleanRow.selected = false;
+    return cleanRow;
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const tableDiv = document.getElementById('excelTable');
+  if (rowsData.length === 0) {
+    tableDiv.innerHTML = '<p>No data found.</p>';
+    return;
+  }
+  const headers = Object.keys(rowsData[0]).filter(h => h !== 'selected');
+  if (!headers.includes('notes')) headers.push('notes');
+
+  const table = document.createElement('table');
+  const headRow = document.createElement('tr');
+  ['Select', ...headers, 'Delete'].forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = HEADER_LABELS[h] || h.charAt(0).toUpperCase() + h.slice(1);
+    headRow.appendChild(th);
+  });
+  table.appendChild(headRow);
+
+  rowsData.forEach((row, i) => {
+    const tr = document.createElement('tr');
+
+    // Checkbox cell
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = !!row.selected;
+    tr.className = checkbox.checked ? 'selected' : 'unselected';
+    checkbox.onchange = () => {
+      tr.className = checkbox.checked ? 'selected' : 'unselected';
+      row.selected = checkbox.checked;
+    };
+    const checkTd = document.createElement('td');
+    checkTd.style.textAlign = "center";
+    checkTd.appendChild(checkbox);
+    tr.appendChild(checkTd);
+
+    // Data cells editable
+    headers.forEach(h => {
+      const td = document.createElement('td');
+      if (h === 'notes') {
+        const textarea = document.createElement('textarea');
+        textarea.className = 'notes-input';
+        textarea.value = row[h] || '';
+        textarea.oninput = () => { row[h] = textarea.value; };
+        td.appendChild(textarea);
+      } else {
+        td.contentEditable = true;
+        td.classList.add('editable');
+        td.textContent = row[h] || '';
+        td.oninput = () => {
+          row[h] = td.textContent.trim();
+        };
+      }
+      tr.appendChild(td);
+    });
+
+    // Delete button cell
+    const delTd = document.createElement('td');
+    delTd.style.textAlign = "center";
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Delete';
+    delBtn.className = 'delete-btn';
+    delBtn.onclick = () => {
+      if (confirm('Are you sure you want to delete this row?')) {
+        rowsData.splice(i, 1);
+        renderTable();
+      }
+    };
+    delTd.appendChild(delBtn);
+    tr.appendChild(delTd);
+
+    table.appendChild(tr);
+  });
+
+  tableDiv.innerHTML = '';
+  tableDiv.appendChild(table);
+}
+
+function addRow() {
+  const newRow = { device_type: '', manufacturer: '', model: '', serial: '', notes: '', selected: false };
+  rowsData.push(newRow);
+  renderTable();
+}
+
+async function saveSelected() {
+  if (rowsData.length === 0) {
+    alert('No data to save!');
+    return;
+  }
+
+  const path = document.getElementById('subFolder').value;
+  if (!path) {
+    alert('Please select a subfolder first');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/save-excel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folderName: path, rows: rowsData })
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      alert('Saved successfully to cloud!');
+    } else {
+      alert('Save failed: ' + (result.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('Error saving: ' + err.message);
+  }
+}
+
+window.onload = loadClientFolders;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>
