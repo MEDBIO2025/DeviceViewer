@@ -286,22 +286,42 @@ async function loadSubfolders(clientFolder) {
 async function loadExcel() {
   const path = document.getElementById('subFolder').value;
   if (!path) return;
-  const res = await fetch(`/api/excel-data?folderName=${encodeURIComponent(path)}`);
-  const data = await res.json();
-  
-  rowsData = data.rows.map(row => {
-    const cleanRow = {};
-    for (const key in row) {
-      if (!key.toLowerCase().includes('duplicate')) { 
-        cleanRow[key] = row[key];
-      }
+
+  try {
+    const res = await fetch(`/api/excel-file?folderName=${encodeURIComponent(path)}`);
+    const arrayBuffer = await res.arrayBuffer();
+
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    // Skip first 6 rows (logo + header info)
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: 6 });
+
+    if (jsonData.length === 0) {
+      rowsData = [];
+      renderTable();
+      return;
     }
-    if (!('notes' in cleanRow)) cleanRow.notes = '';
-    if (!('selected' in cleanRow)) cleanRow.selected = false;
-    return cleanRow;
-  });
-  renderTable();
+
+    const headers = jsonData[0]; // row 7 now is the table header
+    const dataRows = jsonData.slice(1);
+
+    rowsData = dataRows.map(row => {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = row[i] || '');
+      if (!('Notes' in obj)) obj['Notes'] = '';
+      obj.selected = false;
+      return obj;
+    });
+
+    renderTable();
+  } catch (err) {
+    console.error('Error loading Excel:', err);
+    document.getElementById('excelTable').innerHTML = `<p>Error loading Excel: ${err.message}</p>`;
+  }
 }
+
 
 function renderTable() {
   const tableDiv = document.getElementById('excelTable');
