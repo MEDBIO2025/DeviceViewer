@@ -95,7 +95,6 @@ app.get('/api/list-folders', requireLogin, async (req, res) => {
     res.status(500).json({ error: 'Failed to list folders', details: err.message });
   }
 });
-
 app.get('/api/excel-data', requireLogin, async (req, res) => {
   const { folderName } = req.query;
   if (!folderName) return res.status(400).json({ error: 'Missing folderName' });
@@ -141,24 +140,28 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
       headerRows.push(headerRow);
     }
 
-    // Extract data rows starting from row 6 (index 5)
+    // Extract data rows starting from row 7 (index 6)
+    // FIXED: Remove the header option to prevent treating data as headers
     const jsonData = xlsx.utils.sheet_to_json(sheet, { 
-      range: 6, // Start from row 6 (0-indexed row 5)
-      defval: '', 
-      header: ['device_type', 'manufacturer', 'model', 'serial', 'notes', 'selected']
+      range: 6, // Start from row 7 (0-indexed row 6)
+      defval: ''
     });
 
-    // Filter out empty rows and ensure proper structure
-    const filteredData = jsonData.filter(row => 
+    // Map the data to our expected format manually
+    const filteredData = jsonData.map(row => {
+      // Get the values from each column
+      const values = Object.values(row);
+      return {
+        device_type: values[0] || '',
+        manufacturer: values[1] || '',
+        model: values[2] || '',
+        serial: values[3] || '',
+        notes: values[4] || '',
+        selected: false
+      };
+    }).filter(row => 
       row.device_type || row.manufacturer || row.model || row.serial
-    ).map(row => ({
-      device_type: row.device_type || '',
-      manufacturer: row.manufacturer || '',
-      model: row.model || '',
-      serial: row.serial || '',
-      notes: row.notes || '',
-      selected: row.selected || false
-    }));
+    );
 
     return res.json({ 
       headerRows: headerRows,
@@ -179,7 +182,6 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
     });
   }
 });
-
 app.post('/api/save-excel', requireLogin, async (req, res) => {
   try {
     const { folderName, headerRows, rows } = req.body;
