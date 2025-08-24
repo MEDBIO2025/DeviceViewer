@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel Data Load Error Debugger</title>
+    <title>Excel File Naming Debugger</title>
     <style>
         * {
             box-sizing: border-box;
@@ -49,43 +49,16 @@
             padding: 25px;
         }
         
-        .error-section {
-            background: #ffebee;
-            border-left: 5px solid #f44336;
+        .info-section {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
             padding: 20px;
             margin-bottom: 25px;
             border-radius: 5px;
         }
         
-        .error-title {
-            color: #d32f2f;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-        
-        .error-log {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            margin: 15px 0;
-            overflow-x: auto;
-            font-size: 14px;
-        }
-        
-        .solution-section {
-            background: #e8f5e9;
-            border-left: 5px solid #4caf50;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-radius: 5px;
-        }
-        
-        .solution-title {
-            color: #388e3c;
+        .info-title {
+            color: #1565c0;
             font-weight: bold;
             margin-bottom: 15px;
             font-size: 20px;
@@ -130,64 +103,6 @@
             color: #d63384;
         }
         
-        .btn {
-            display: inline-block;
-            background: #3498db;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        
-        .btn:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .test-btn {
-            background: #9b59b6;
-        }
-        
-        .test-btn:hover {
-            background: #8e44ad;
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        .success {
-            background: #e8f5e9;
-            border: 1px solid #4caf50;
-        }
-        
-        .failure {
-            background: #ffebee;
-            border: 1px solid #f44336;
-        }
-        
-        .section {
-            margin-bottom: 30px;
-        }
-        
-        .highlight {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #ffc107;
-            margin: 15px 0;
-        }
-        
         .folder-structure {
             background: #f8f9fa;
             padding: 15px;
@@ -206,6 +121,47 @@
             margin-left: 20px;
         }
         
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        
+        .naming-tool {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 margin: 20px auto;
@@ -220,176 +176,126 @@
 <body>
     <div class="container">
         <header>
-            <h1>Excel Data Load Error Debugger</h1>
-            <p class="description">Fix server 500 errors when loading Excel data from OneDrive</p>
+            <h1>Excel File Naming Debugger</h1>
+            <p class="description">Understand how your Excel files are named and located</p>
         </header>
         
         <div class="content">
-            <div class="error-section">
-                <h2 class="error-title">Error: Server 500 Internal Error</h2>
-                <p>Your server is returning a 500 status code, which indicates an internal server error when trying to load Excel data.</p>
-                <div class="error-log">
-GET https://deviceviewer.onrender.com/api/excel-data?folderName=__Oakridges%20Surgicentre%2FOakridge%20Surgi%20Centre%202024%20July 500 (Internal Server Error)
-                </div>
-                <p>This error occurs when the server encounters an unexpected condition that prevents it from fulfilling the request.</p>
-            </div>
-            
-            <div class="solution-section">
-                <h2 class="solution-title">Quick Fixes</h2>
-                <p>The 500 error indicates a server-side issue. Here are the most likely solutions:</p>
+            <div class="info-section">
+                <h2 class="info-title">How Excel File Naming Works</h2>
+                <p>Your application automatically generates Excel filenames based on the folder structure. The filename is created by combining the clinic name and subfolder name.</p>
             </div>
             
             <div class="card">
-                <h3 class="card-title">1. Check Server Logs</h3>
-                <p>The 500 error is a generic server error. You need to check your server logs for more specific information:</p>
-                <ul class="steps">
-                    <li>Access your server console on Render.com</li>
-                    <li>Look for error messages related to the Excel data loading</li>
-                    <li>Check for authentication errors with Microsoft Graph API</li>
-                    <li>Look for file path or permission issues</li>
-                </ul>
-                <div class="code">// Example of what to look for in server logs
-Error: Invalid authentication token
-Error: File not found
-Error: The specified item could not be found in the drive
-Error: Permission denied</div>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">2. Verify File Path and Naming</h3>
-                <p>Your server is looking for an Excel file with a specific naming pattern:</p>
+                <h3 class="card-title">Filename Generation Logic</h3>
+                <p>Your server code creates the Excel filename using this pattern:</p>
                 <div class="code">// Server code constructs the filename like this:
 const parts = folderName.split('/');
 const fileNameBase = parts.join('_');
 const excelFileName = `${fileNameBase}_equipment_data.xlsx`;</div>
-                <p>For your folder path, the server is looking for:</p>
-                <div class="code">__Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</div>
-                <p>Make sure:</p>
-                <ul class="steps">
-                    <li>The Excel file exists with this exact name</li>
-                    <li>The file is in the correct folder in OneDrive</li>
-                    <li>There are no typos in the folder or file names</li>
-                </ul>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">3. Test API Connection</h3>
-                <p>Use the button below to test if your server can connect to the Microsoft Graph API:</p>
-                <button class="btn test-btn" onclick="testAPIConnection()">Test API Connection</button>
-                <div id="testResult" class="result"></div>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">4. Verify Authentication</h3>
-                <p>Your server uses the Microsoft Graph API to access OneDrive files. Ensure:</p>
-                <ul class="steps">
-                    <li>Your Azure AD credentials are correct (TENANT_ID, CLIENT_ID, CLIENT_SECRET)</li>
-                    <li>Your Azure App has the necessary permissions (Files.ReadWrite.All)</li>
-                    <li>Your access token is valid and not expired</li>
-                    <li>The ONEDRIVE_USER has access to the files</li>
-                </ul>
+                
+                <p>For a folder path like: <code>Oakridges Surgicentre/Oakridge Surgi Centre 2024 July</code></p>
+                <p>The server will look for: <code>Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code></p>
+                
                 <div class="highlight">
-                    <p><strong>Most Common Cause:</strong> Expired client secret or incorrect API permissions.</p>
+                    <p><strong>But you mentioned your file is named:</strong> <code>Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code></p>
+                    <p>This suggests there might be a mismatch between your folder structure and file naming.</p>
                 </div>
             </div>
             
             <div class="card">
-                <h3 class="card-title">5. Debug Your Server Code</h3>
-                <p>Add detailed error logging to your server to identify the exact issue:</p>
-                <div class="code">// Enhanced error handling for /api/excel-data endpoint
-app.get('/api/excel-data', requireLogin, async (req, res) => {
-  const { folderName } = req.query;
-  console.log('Fetching Excel data for folder:', folderName);
-  
-  try {
-    const token = await getAccessToken();
-    console.log('Access token acquired successfully');
-    
-    const parts = folderName.split('/');
-    const fileNameBase = parts.join('_');
-    const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
-    console.log('Looking for Excel file:', excelFileName);
-
-    const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
-    console.log('OneDrive file URL:', fileUrl);
-
-    const response = await axios.get(fileUrl, {
-      headers: { Authorization: `Bearer ${token}` },
-      responseType: 'arraybuffer'
-    });
-    
-    console.log('Excel file downloaded successfully');
-    
-    // Process the Excel file...
-    
-  } catch (err) {
-    console.error('Detailed Excel fetch error:', {
-      message: err.message,
-      stack: err.stack,
-      response: err.response?.data
-    });
-    
-    res.status(500).json({ 
-      error: 'Could not fetch Excel file', 
-      details: err.message
-    });
-  }
-});</div>
+                <h3 class="card-title">Expected Folder Structure</h3>
+                <p>Your server expects files to be in this structure:</p>
+                <div class="folder-structure">
+                    <div class="folder">REPORTS</div>
+                    <div class="folder">Service Report 2020</div>
+                    <div class="folder">Oakridges Surgicentre (Clinic Name)</div>
+                    <div class="folder">Oakridge Surgi Centre 2024 July (Subfolder)</div>
+                    <div class="file">Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</div>
+                </div>
+                <p>But if your file is named <code>Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code>, it suggests the folder structure might be different.</p>
+            </div>
+            
+            <div class="naming-tool">
+                <h3 class="card-title">Filename Troubleshooter</h3>
+                <p>Enter your folder path to see what filename the server expects:</p>
+                
+                <div class="input-group">
+                    <label for="clinicName">Clinic Name:</label>
+                    <input type="text" id="clinicName" placeholder="e.g., Oakridges Surgicentre" value="Oakridges Surgicentre">
+                </div>
+                
+                <div class="input-group">
+                    <label for="subfolderName">Subfolder Name:</label>
+                    <input type="text" id="subfolderName" placeholder="e.g., Oakridge Surgi Centre 2024 July" value="Oakridge Surgi Centre 2024 July">
+                </div>
+                
+                <div class="result" id="fileNameResult">
+                    Server will look for: <strong>Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</strong>
+                </div>
             </div>
             
             <div class="card">
-                <h3 class="card-title">6. Check File Existence</h3>
-                <p>Before trying to download the Excel file, check if it exists:</p>
-                <div class="code">// Add this to your /api/excel-data endpoint
-// After getting the token, check if file exists
-const fileCheckUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}`;
+                <h3 class="card-title">Possible Solutions</h3>
+                <p>Based on your file name, here are the possible solutions:</p>
+                
+                <div class="highlight">
+                    <p><strong>Option 1: Rename your Excel file</strong></p>
+                    <p>Change the filename to match the expected pattern: <code>Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code></p>
+                </div>
+                
+                <div class="highlight">
+                    <p><strong>Option 2: Modify your server code</strong></p>
+                    <p>Change the filename generation logic to match your naming convention:</p>
+                    <div class="code">// Alternative 1: Use only the subfolder name
+const excelFileName = `Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx`;
 
-try {
-  const fileCheck = await axios.get(fileCheckUrl, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  console.log('File found:', fileCheck.data);
-} catch (err) {
-  console.error('File not found. Please check the path and filename.');
-  throw new Error(`Excel file not found: ${excelFileName}`);
-}</div>
+// Alternative 2: Use only the last part of the path
+const parts = folderName.split('/');
+const subfolderOnly = parts[parts.length - 1];
+const excelFileName = `${subfolderOnly}_equipment_data.xlsx`;
+
+// Alternative 3: Custom naming logic
+const excelFileName = generateExcelFileName(folderName);</div>
+                </div>
+                
+                <div class="highlight">
+                    <p><strong>Option 3: Restructure your folders</strong></p>
+                    <p>Change your folder structure so the clinic name is not part of the path, or adjust it to match your filename pattern.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Debugging Steps</h3>
+                <ol class="steps">
+                    <li>Check your exact folder structure in OneDrive</li>
+                    <li>Verify the actual filename of your Excel file</li>
+                    <li>Compare with what the server expects using the tool above</li>
+                    <li>Either rename the file or modify your server code to match</li>
+                    <li>Test with a simple folder structure first</li>
+                </ol>
             </div>
         </div>
     </div>
 
     <script>
-        function testAPIConnection() {
-            const resultDiv = document.getElementById('testResult');
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'result';
-            resultDiv.innerHTML = '<p>Testing API connection...</p>';
-            
-            fetch('/api/list-folders?path=REPORTS/Service Report 2020')
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error(`Server returned ${response.status}`);
-                })
-                .then(data => {
-                    resultDiv.classList.add('success');
-                    resultDiv.innerHTML = `
-                        <p>✅ API connection successful!</p>
-                        <p>Found ${data.length} folders in "REPORTS/Service Report 2020":</p>
-                        <ul>${data.map(folder => `<li>${folder}</li>`).join('')}</ul>
-                    `;
-                })
-                .catch(error => {
-                    resultDiv.classList.add('failure');
-                    resultDiv.innerHTML = `
-                        <p>❌ API connection failed: ${error.message}</p>
-                        <p>This suggests an issue with your server configuration or authentication.</p>
-                    `;
-                });
-        }
+        // Update filename when inputs change
+        document.getElementById('clinicName').addEventListener('input', updateFileName);
+        document.getElementById('subfolderName').addEventListener('input', updateFileName);
         
-        // Display environment info (if available)
-        console.log("Server 500 Error Debugger loaded. Check the server-side issues mentioned above.");
+        function updateFileName() {
+            const clinicName = document.getElementById('clinicName').value;
+            const subfolderName = document.getElementById('subfolderName').value;
+            
+            // Simulate the server's filename generation
+            const folderPath = `${clinicName}/${subfolderName}`;
+            const parts = folderPath.split('/');
+            const fileNameBase = parts.join('_');
+            const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
+            
+            document.getElementById('fileNameResult').innerHTML = 
+                `Server will look for: <strong>${excelFileName}</strong>`;
+        }
     </script>
 </body>
 </html>
