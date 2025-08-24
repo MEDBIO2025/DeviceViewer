@@ -95,7 +95,6 @@ app.get('/api/list-folders', requireLogin, async (req, res) => {
     res.status(500).json({ error: 'Failed to list folders', details: err.message });
   }
 });
-
 app.get('/api/excel-data', requireLogin, async (req, res) => {
   const { folderName } = req.query;
   if (!folderName) return res.status(400).json({ error: 'Missing folderName' });
@@ -103,29 +102,25 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
   try {
     const token = await getAccessToken();
 
-    // Split folder path
-    const parts = folderName.split('/'); // e.g., ["Oakridge Surgi Centre", "2024", "July"]
-    const lastFolderName = parts[parts.length - 1];
-
-    // Build filename exactly like Python script
-    const fileNameBase = parts.join('_'); // combine all folder parts with underscores
+    const parts = folderName.split('/');
+    const fileNameBase = parts.join('_');
     const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
 
     const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
 
-    // Fetch Excel from OneDrive
     const response = await axios.get(fileUrl, {
       headers: { Authorization: `Bearer ${token}` },
       responseType: 'arraybuffer'
     });
 
-    // Read workbook
     const workbook = xlsx.read(response.data, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
-    
-    // Convert sheet to JSON, skipping first 6 rows (row index starts at 0)
     const sheet = workbook.Sheets[sheetName];
-    const sheetData = xlsx.utils.sheet_to_json(sheet, { range: 6 }); // skip top 6 rows
+
+    const sheetData = xlsx.utils.sheet_to_json(sheet, { 
+      range: 6,      // skip first 6 rows
+      defval: '',    // default empty string for empty cells
+    });
 
     return res.json({ 
       rows: sheetData,
