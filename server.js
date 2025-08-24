@@ -10,8 +10,8 @@ const bodyParser = require('body-parser');
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(session({
   secret: 'super_secure_secret_change_this',
@@ -95,6 +95,7 @@ app.get('/api/list-folders', requireLogin, async (req, res) => {
     res.status(500).json({ error: 'Failed to list folders', details: err.message });
   }
 });
+
 app.get('/api/excel-data', requireLogin, async (req, res) => {
   const { folderName } = req.query;
   if (!folderName) return res.status(400).json({ error: 'Missing folderName' });
@@ -117,13 +118,43 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    const sheetData = xlsx.utils.sheet_to_json(sheet, { 
-      range: 6,      // skip first 6 rows
-      defval: '',    // default empty string for empty cells
+    // Get the full range of the sheet to extract header information
+    const range = xlsx.utils.decode_range(sheet['!ref']);
+    const headerRows = [];
+    
+    // Extract the first 6 rows as header information
+    for (let row = 0; row < 6 && row <= range.e.r; row++) {
+      const headerRow = [];
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const cellAddress = xlsx.utils.encode_cell({ r: row, c: col });
+        const cell = sheet[cellAddress];
+        headerRow.push(cell ? cell.v : '');
+      }
+      headerRows.push(headerRow);
+    }
+
+    // Extract data rows starting from row 6 (index 5)
+    const jsonData = xlsx.utils.sheet_to_json(sheet, { 
+      range: 5, // Start from row 6 (0-indexed row 5)
+      defval: '', 
+      header: ['device_type', 'manufacturer', 'model', 'serial', 'notes', 'selected']
     });
 
+    // Filter out empty rows and ensure proper structure
+    const filteredData = jsonData.filter(row => 
+      row.device_type || row.manufacturer || row.model || row.serial
+    ).map(row => ({
+      device_type: row.device_type || '',
+      manufacturer: row.manufacturer || '',
+      model: row.model || '',
+      serial: row.serial || '',
+      notes: row.notes || '',
+      selected: row.selected || false
+    }));
+
     return res.json({ 
-      rows: sheetData,
+      headerRows: headerRows,
+      rows: filteredData,
       fileName: excelFileName
     });
 
@@ -133,10 +164,9 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
   }
 });
 
-
 app.post('/api/save-excel', requireLogin, async (req, res) => {
   try {
-    const { folderName, rows } = req.body;
+    const { folderName, headerRows, rows } = req.body;
     if (!folderName || !rows || !Array.isArray(rows)) {
       return res.status(400).json({ error: 'Missing or invalid folderName or rows' });
     }
@@ -149,13 +179,42 @@ app.post('/api/save-excel', requireLogin, async (req, res) => {
     const timestamp = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
     const backupFileName = `${fileNameBase}_equipment_data_${timestamp}.xlsx`;
 
-    // Create the Excel workbook
+    // Create the Excel workbook with proper structure
     const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(rows);
+    
+    // Create the worksheet data array
+    const ws_data = [];
+    
+    // Add header rows if provided, otherwise use default
+    if (headerRows && Array.isArray(headerRows)) {
+      headerRows.forEach(row => ws_data.push(row));
+    } else {
+      // Default header structure
+      ws_data.push(['', '', 'Medical Center', 'BioMedix Engineering Inc']);
+      ws_data.push(['', '', '123 Main Street', '2030 Bristol Circle, Suite 210']);
+      ws_data.push(['', '', 'Suite 100', 'Oakville, ON L6H 6P5']);
+      ws_data.push(['', '', 'N/A', 'Ph.: 416-875-1407']);
+      ws_data.push([]);
+      ws_data.push(['Device Type', 'Manufacturer', 'Model', 'Serial Number', 'Notes', 'Selected']);
+    }
+    
+    // Add data rows
+    rows.forEach(row => {
+      ws_data.push([
+        row.device_type || '',
+        row.manufacturer || '',
+        row.model || '',
+        row.serial || '',
+        row.notes || '',
+        row.selected ? 'Yes' : 'No'
+      ]);
+    });
+    
+    const ws = xlsx.utils.aoa_to_sheet(ws_data);
     xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
     const wbBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
-    // Save ONLY the backup version with timestamp
+    // Save the backup version with timestamp
     const backupUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${backupFileName}:/content`;
     await axios.put(backupUrl, wbBuffer, {
       headers: {
