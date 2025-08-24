@@ -159,6 +159,74 @@
       margin: 1rem 0;
     }
 
+    /* Debug panel styles */
+    .debug-panel {
+      background: #2c3e50;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+    .debug-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .debug-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .debug-toggle {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .debug-content {
+      font-family: monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .debug-section {
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    .debug-test {
+      margin-top: 10px;
+    }
+    .debug-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+    .debug-result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+    .debug-success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #4caf50;
+    }
+    .debug-failure {
+      background: #ffebee;
+      color: #d32f2f;
+      border: 1px solid #f44336;
+    }
+
     /* Mobile tweaks */
     @media (max-width: 768px) {
       body, .container {
@@ -246,10 +314,48 @@
   <div class="button-group">
     <button onclick="addRow()">Add New Row</button>
     <button onclick="saveSelected()">Save Selected</button>
+    <button class="debug-toggle" onclick="toggleDebug()">Debug</button>
   </div>
 
   <div id="loadingMessage" class="loading">Select a clinic and subfolder to load data</div>
   <div id="excelTable"></div>
+
+  <!-- Debug Panel -->
+  <div id="debugPanel" class="debug-panel">
+    <div class="debug-header">
+      <div class="debug-title">401 Error Debugger</div>
+      <button class="debug-toggle" onclick="toggleDebug()">Hide</button>
+    </div>
+    
+    <div class="debug-content">
+      <div class="debug-section">
+        <strong>Error:</strong> 401 Unauthorized - Authentication failed
+      </div>
+      
+      <div class="debug-section">
+        <strong>Quick Fixes:</strong>
+        <ul>
+          <li>Check if you're logged in (session might have expired)</li>
+          <li>Verify Azure AD credentials are correct</li>
+          <li>Ensure your Azure App has proper permissions</li>
+        </ul>
+      </div>
+      
+      <div class="debug-section">
+        <strong>Diagnostic Tests:</strong>
+        <div class="debug-test">
+          <button class="debug-btn" onclick="testAuth()">Test Authentication</button>
+          <button class="debug-btn" onclick="testServer()">Test Server Connection</button>
+          <div id="debugResult" class="debug-result"></div>
+        </div>
+      </div>
+      
+      <div class="debug-section">
+        <strong>Current Status:</strong>
+        <div id="debugStatus">Ready to test...</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -264,6 +370,77 @@ const HEADER_LABELS = {
   notes: 'Notes'
 };
 
+// Debug functions
+function toggleDebug() {
+  const debugPanel = document.getElementById('debugPanel');
+  debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
+}
+
+function testAuth() {
+  const resultDiv = document.getElementById('debugResult');
+  resultDiv.style.display = 'block';
+  resultDiv.className = 'debug-result';
+  resultDiv.innerHTML = '<p>Testing authentication status...</p>';
+  document.getElementById('debugStatus').textContent = 'Testing authentication...';
+  
+  fetch('/api/list-folders')
+    .then(response => {
+      if (response.status === 401) {
+        throw new Error('Not authenticated (401)');
+      }
+      return response.json();
+    })
+    .then(data => {
+      resultDiv.classList.add('debug-success');
+      resultDiv.innerHTML = `
+        <p>✅ You are authenticated successfully!</p>
+        <p>Found ${data.length} folders.</p>
+      `;
+      document.getElementById('debugStatus').textContent = 'Authentication successful';
+    })
+    .catch(error => {
+      resultDiv.classList.add('debug-failure');
+      resultDiv.innerHTML = `
+        <p>❌ Authentication failed: ${error.message}</p>
+        <p>Please <a href="/login.html" style="color: #d32f2f;">log in again</a>.</p>
+      `;
+      document.getElementById('debugStatus').textContent = 'Authentication failed';
+    });
+}
+
+function testServer() {
+  const resultDiv = document.getElementById('debugResult');
+  resultDiv.style.display = 'block';
+  resultDiv.className = 'debug-result';
+  resultDiv.innerHTML = '<p>Testing server connection...</p>';
+  document.getElementById('debugStatus').textContent = 'Testing server connection...';
+  
+  fetch('/api/list-folders')
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error(`Server returned ${response.status}`);
+    })
+    .then(data => {
+      resultDiv.classList.add('debug-success');
+      resultDiv.innerHTML = `
+        <p>✅ Server connection successful!</p>
+        <p>Server is responding to API requests.</p>
+      `;
+      document.getElementById('debugStatus').textContent = 'Server connection successful';
+    })
+    .catch(error => {
+      resultDiv.classList.add('debug-failure');
+      resultDiv.innerHTML = `
+        <p>❌ Server connection failed: ${error.message}</p>
+        <p>This suggests an authentication issue on the server side.</p>
+      `;
+      document.getElementById('debugStatus').textContent = 'Server connection failed';
+    });
+}
+
+// Original functions
 async function loadClientFolders() {
   try {
     document.getElementById('loadingMessage').textContent = 'Loading clinics...';
@@ -530,6 +707,11 @@ window.onload = function() {
       document.getElementById('autocompleteResults').innerHTML = '';
     }
   });
+  
+  // Show debug panel if there's an error in the URL
+  if (window.location.search.includes('error=401')) {
+    document.getElementById('debugPanel').style.display = 'block';
+  }
 };
 </script>
 </body>
