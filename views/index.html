@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Medical Device Scanner</title>
   <style>
-    
     * { box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,24 +14,39 @@
       color: #333;
     }
     h2 {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-    
+      text-align: center;
+      margin-top: 1rem;
+    }
     header {
       background: #fff;
       padding: 1rem 2rem;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       border-bottom: 1px solid #ddd;
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      height: 60px;
     }
-    nav a {
-      margin-left: 1.5rem;
+    .new-clinics-link {
+      position: absolute;
+      right: 0.5rem;
+      top: 8px;
+      font-weight: 600; 
+      font-size: 0.85rem; 
+      color: #555;
+      background-color: #e0e0e0;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
       text-decoration: none;
-      color: #333;
-      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+    .new-clinics-link:hover {
+      background-color: #cfcfcf;
     }
     .container {
       max-width: 900px;
@@ -41,13 +55,13 @@
       background: #fff;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      overflow-x: auto; /* allow horizontal scroll if needed */
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 2rem;
-      min-width: 700px; /* keep table wide enough */
+      min-width: 700px;
       table-layout: fixed;
       word-wrap: break-word;
     }
@@ -68,10 +82,29 @@
       border: 1px solid #ccc;
       border-radius: 6px;
     }
-    .autocomplete-list div { cursor: pointer; padding: 0.6rem; }
+    .autocomplete-list {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: calc(100% - 2px);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .autocomplete-list div { 
+      cursor: pointer; 
+      padding: 0.6rem; 
+    }
     .autocomplete-list div:hover { background: #f0f8ff; }
-    .form-group { margin-bottom: 1.5rem; position: relative; }
-    .button-group { margin-top: 1rem; text-align: center; }
+    .form-group { 
+      margin-bottom: 1.5rem; 
+      position: relative; 
+    }
+    .button-group { 
+      margin-top: 1rem; 
+      text-align: center; 
+    }
     button {
       margin: 0 0.5rem;
       background: #0078d4;
@@ -112,8 +145,21 @@
     button.delete-btn:hover {
       background: #a71d2a;
     }
+    .loading {
+      text-align: center;
+      padding: 1rem;
+      font-style: italic;
+      color: #666;
+    }
+    .error {
+      color: #dc3545;
+      padding: 1rem;
+      background: #f8d7da;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
 
-    /* Mobile tweaks: keep horizontal table but scale font and allow scroll */
+    /* Mobile tweaks */
     @media (max-width: 768px) {
       body, .container {
         padding: 1rem;
@@ -122,10 +168,12 @@
         flex-direction: column;
         align-items: flex-start;
         padding: 1rem;
+        height: auto;
       }
-      nav a {
-        margin-left: 0;
-        margin-right: 1rem;
+      .new-clinics-link {
+        position: relative;
+        margin-top: 0.5rem;
+        align-self: flex-end;
       }
       table {
         min-width: 600px;
@@ -162,53 +210,22 @@
     }
   </style>
 </head>
-<body><header style="
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  padding: 1rem 2rem; 
-  background: #fff; 
-  border-bottom: 1px solid #ddd;
-  max-width: 900px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  position: relative;
-  height: 60px;
-">
+<body>
+<header>
   <img 
     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsIz5ldp6L3p2gzRI_1AQ2xxSIpx1xuYby5A&s" 
     alt="Logo" 
     style="height: 55px; object-fit: contain;"
   />
-
   <a 
     href="https://medicaldevicescanner.onrender.com" 
     target="_blank" 
     rel="noopener" 
-    style="
-      position: absolute;
-      right: 0.5rem;
-      top: 8px;
-      font-weight: 600; 
-      font-size: 0.85rem; 
-      color: #555;
-      background-color: #e0e0e0;
-      padding: 0.2rem 0.2rem;
-      border-radius: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-      white-space: nowrap;
-    "
-    onmouseover="this.style.backgroundColor='#cfcfcf';"
-    onmouseout="this.style.backgroundColor='#e0e0e0';"
+    class="new-clinics-link"
   >
     New Clinics
   </a>
 </header>
-
-
 
 <div class="container">
   <h2>Medical Device Viewer</h2>
@@ -231,7 +248,7 @@
     <button onclick="saveSelected()">Save Selected</button>
   </div>
 
-  <div id="loadingMessage"></div>
+  <div id="loadingMessage" class="loading">Select a clinic and subfolder to load data</div>
   <div id="excelTable"></div>
 </div>
 
@@ -248,16 +265,39 @@ const HEADER_LABELS = {
 };
 
 async function loadClientFolders() {
-  const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020`);
-  const folders = await res.json();
-  allClientFolders = folders;
+  try {
+    document.getElementById('loadingMessage').textContent = 'Loading clinics...';
+    const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020`);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    const folders = await res.json();
+    allClientFolders = folders;
+    document.getElementById('loadingMessage').textContent = 'Select a clinic and subfolder to load data';
+  } catch (err) {
+    console.error('Error loading folders:', err);
+    document.getElementById('loadingMessage').textContent = 'Error loading clinics: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
+  }
 }
 
 function filterSuggestions() {
   const input = document.getElementById('clinicSearch').value.toLowerCase();
   const results = document.getElementById('autocompleteResults');
   results.innerHTML = '';
-  allClientFolders.filter(f => f.toLowerCase().includes(input)).slice(0, 10).forEach(name => {
+  
+  if (input.length < 2) return;
+  
+  const filtered = allClientFolders.filter(f => f.toLowerCase().includes(input)).slice(0, 10);
+  
+  if (filtered.length === 0) {
+    const div = document.createElement('div');
+    div.textContent = 'No matching clinics found';
+    results.appendChild(div);
+    return;
+  }
+  
+  filtered.forEach(name => {
     const div = document.createElement('div');
     div.textContent = name;
     div.onclick = () => {
@@ -270,51 +310,70 @@ function filterSuggestions() {
 }
 
 async function loadSubfolders(clientFolder) {
-  const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020/${clientFolder}`);
-  const folders = await res.json();
-  const select = document.getElementById('subFolder');
-  select.innerHTML = '<option disabled selected>Select a subfolder</option>';
-  folders.forEach(f => {
-    const opt = document.createElement('option');
-    opt.value = `${clientFolder}/${f}`;
-    opt.textContent = f;
-    select.appendChild(opt);
-  });
-  select.disabled = false;
+  try {
+    document.getElementById('loadingMessage').textContent = `Loading subfolders for ${clientFolder}...`;
+    const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020/${encodeURIComponent(clientFolder)}`);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    const folders = await res.json();
+    const select = document.getElementById('subFolder');
+    select.innerHTML = '<option disabled selected>Select a subfolder</option>';
+    folders.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = `${clientFolder}/${f}`;
+      opt.textContent = f;
+      select.appendChild(opt);
+    });
+    select.disabled = false;
+    document.getElementById('loadingMessage').textContent = 'Select a subfolder to load data';
+  } catch (err) {
+    console.error('Error loading subfolders:', err);
+    document.getElementById('loadingMessage').textContent = 'Error loading subfolders: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
+  }
 }
+
 async function loadExcel() {
   const path = document.getElementById('subFolder').value;
   if (!path) return;
 
   try {
+    document.getElementById('loadingMessage').textContent = 'Loading Excel data...';
+    document.getElementById('loadingMessage').className = 'loading';
+    document.getElementById('excelTable').innerHTML = '';
+    
     const res = await fetch(`/api/excel-data?folderName=${encodeURIComponent(path)}`);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    
     const data = await res.json();
-
-    // The backend sends rows including header rows; we skip first 6
-    const rowsAfterHeader = data.rows.slice(6);
-
-    rowsData = rowsAfterHeader.map(row => {
-      // Map the headers exactly
-      const cleanRow = {
-        'Device Type': row['Device Type'] || '',
-        'Manufacturer': row['Manufacturer'] || '',
-        'Model': row['Model'] || '',
-        'Serial Number': row['Serial Number'] || '',
-        'notes': row['notes'] || '',
-        selected: row['selected'] || false
-      };
-      return cleanRow;
-    });
-
+    
+    // Check if we have valid data
+    if (!data.rows || !Array.isArray(data.rows)) {
+      throw new Error('Invalid data format received from server');
+    }
+    
+    // Map the data to our expected format
+    rowsData = data.rows.map(row => ({
+      device_type: row['Device Type'] || row['device_type'] || '',
+      manufacturer: row['Manufacturer'] || row['manufacturer'] || '',
+      model: row['Model'] || row['model'] || '',
+      serial: row['Serial Number'] || row['serial'] || '',
+      notes: row['notes'] || '',
+      selected: row['selected'] || false
+    }));
+    
     renderTable();
+    document.getElementById('loadingMessage').textContent = '';
+    
   } catch (err) {
     console.error('Error loading Excel:', err);
-    document.getElementById('excelTable').innerHTML = `<p>Error loading Excel: ${err.message}</p>`;
+    document.getElementById('loadingMessage').textContent = 'Error loading Excel: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
   }
 }
-
-
-
 
 function renderTable() {
   const tableDiv = document.getElementById('excelTable');
@@ -322,16 +381,31 @@ function renderTable() {
     tableDiv.innerHTML = '<p>No data found.</p>';
     return;
   }
-  const headers = Object.keys(rowsData[0]).filter(h => h !== 'selected');
-  if (!headers.includes('notes')) headers.push('notes');
-
+  
+  const headers = ['device_type', 'manufacturer', 'model', 'serial', 'notes'];
+  
   const table = document.createElement('table');
   const headRow = document.createElement('tr');
-  ['Select', ...headers, 'Delete'].forEach(h => {
+  
+  // Add checkbox column header
+  const selectTh = document.createElement('th');
+  selectTh.textContent = 'Select';
+  selectTh.style.width = '60px';
+  headRow.appendChild(selectTh);
+  
+  // Add data column headers
+  headers.forEach(h => {
     const th = document.createElement('th');
     th.textContent = HEADER_LABELS[h] || h.charAt(0).toUpperCase() + h.slice(1);
     headRow.appendChild(th);
   });
+  
+  // Add delete column header
+  const deleteTh = document.createElement('th');
+  deleteTh.textContent = 'Delete';
+  deleteTh.style.width = '70px';
+  headRow.appendChild(deleteTh);
+  
   table.appendChild(headRow);
 
   rowsData.forEach((row, i) => {
@@ -394,7 +468,14 @@ function renderTable() {
 }
 
 function addRow() {
-  const newRow = { device_type: '', manufacturer: '', model: '', serial: '', notes: '', selected: false };
+  const newRow = { 
+    device_type: '', 
+    manufacturer: '', 
+    model: '', 
+    serial: '', 
+    notes: '', 
+    selected: false 
+  };
   rowsData.push(newRow);
   renderTable();
 }
@@ -412,6 +493,9 @@ async function saveSelected() {
   }
 
   try {
+    document.getElementById('loadingMessage').textContent = 'Saving data...';
+    document.getElementById('loadingMessage').className = 'loading';
+    
     const res = await fetch('/api/save-excel', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -421,17 +505,32 @@ async function saveSelected() {
     const result = await res.json();
 
     if (res.ok) {
-      alert('Saved successfully to cloud!');
+      document.getElementById('loadingMessage').textContent = 'Saved successfully to cloud!';
+      document.getElementById('loadingMessage').className = 'loading';
+      setTimeout(() => {
+        document.getElementById('loadingMessage').textContent = '';
+      }, 2000);
     } else {
-      alert('Save failed: ' + (result.error || 'Unknown error'));
+      throw new Error(result.error || 'Unknown error');
     }
   } catch (err) {
-    alert('Error saving: ' + err.message);
+    console.error('Error saving:', err);
+    document.getElementById('loadingMessage').textContent = 'Save failed: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
   }
 }
 
-window.onload = loadClientFolders;
+// Initialize when page loads
+window.onload = function() {
+  loadClientFolders();
+  
+  // Close autocomplete when clicking outside
+  document.addEventListener('click', function(e) {
+    if (e.target.id !== 'clinicSearch') {
+      document.getElementById('autocompleteResults').innerHTML = '';
+    }
+  });
+};
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </body>
 </html>
