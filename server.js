@@ -143,7 +143,7 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
 
     // Extract data rows starting from row 6 (index 5)
     const jsonData = xlsx.utils.sheet_to_json(sheet, { 
-      range: 5, // Start from row 6 (0-indexed row 5)
+      range: 6, // Start from row 6 (0-indexed row 5)
       defval: '', 
       header: ['device_type', 'manufacturer', 'model', 'serial', 'notes', 'selected']
     });
