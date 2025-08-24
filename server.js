@@ -102,61 +102,42 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
 
   try {
     const token = await getAccessToken();
-    const parts = folderName.split('/');
+
+    // Split folder path
+    const parts = folderName.split('/'); // e.g., ["Oakridge Surgi Centre", "2024", "July"]
     const lastFolderName = parts[parts.length - 1];
-    const fileNameBase = lastFolderName.replace(/ /g, '_');
+
+    // Build filename exactly like Python script
+    const fileNameBase = parts.join('_'); // combine all folder parts with underscores
+    const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
+
+    const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
+
+    // Fetch Excel from OneDrive
+    const response = await axios.get(fileUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: 'arraybuffer'
+    });
+
+    // Read workbook
+    const workbook = xlsx.read(response.data, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
     
-    // First try to load the original file
-    const originalUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${fileNameBase}_equipment_data.xlsx:/content`;
-    
-    try {
-      const response = await axios.get(originalUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'arraybuffer',
-      });
+    // Convert sheet to JSON, skipping first 6 rows (row index starts at 0)
+    const sheet = workbook.Sheets[sheetName];
+    const sheetData = xlsx.utils.sheet_to_json(sheet, { range: 6 }); // skip top 6 rows
 
-      const workbook = xlsx.read(response.data, { type: 'buffer' });
-      const sheetName = workbook.SheetNames[0];
-      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    return res.json({ 
+      rows: sheetData,
+      fileName: excelFileName
+    });
 
-      return res.json({ 
-        rows: sheetData,
-        fileName: `${fileNameBase}_equipment_data.xlsx`
-      });
-    } catch (originalError) {
-      // If original not found, find the most recent dated version
-      const searchUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}:/children?$filter=startswith(name,'${fileNameBase}_equipment_data') and endswith(name,'.xlsx')&$orderby=createdDateTime desc&$top=1`;
-      
-      const searchResponse = await axios.get(searchUrl, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (searchResponse.data.value.length === 0) {
-        return res.status(404).json({ error: 'No Excel files found for this client' });
-      }
-
-      const latestFile = searchResponse.data.value[0];
-      const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:${latestFile.parentReference.path}/${latestFile.name}:/content`;
-
-      const response = await axios.get(fileUrl, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'arraybuffer',
-      });
-
-      const workbook = xlsx.read(response.data, { type: 'buffer' });
-      const sheetName = workbook.SheetNames[0];
-      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-      return res.json({ 
-        rows: sheetData,
-        fileName: latestFile.name
-      });
-    }
   } catch (err) {
     console.error('Error fetching Excel:', err.response?.data || err.message);
     res.status(500).json({ error: 'Could not fetch Excel file', details: err.message });
   }
 });
+
 
 app.post('/api/save-excel', requireLogin, async (req, res) => {
   try {
