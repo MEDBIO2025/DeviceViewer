@@ -103,11 +103,19 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
   try {
     const token = await getAccessToken();
 
+    // FIXED: Use only the subfolder name for the filename, not the full path
     const parts = folderName.split('/');
-    const fileNameBase = parts.join('_');
+    // Get just the subfolder name (last part of the path)
+    const subfolderName = parts[parts.length - 1];
+    // Replace spaces with underscores in the subfolder name
+    const fileNameBase = subfolderName.replace(/ /g, '_');
     const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
 
+    console.log('Looking for Excel file:', excelFileName);
+
     const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
+
+    console.log('OneDrive file URL:', fileUrl);
 
     const response = await axios.get(fileUrl, {
       headers: { Authorization: `Bearer ${token}` },
@@ -159,8 +167,16 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Error fetching Excel:', err.response?.data || err.message);
-    res.status(500).json({ error: 'Could not fetch Excel file', details: err.message });
+    console.error('Detailed Excel fetch error:', {
+      message: err.message,
+      stack: err.stack,
+      response: err.response?.data
+    });
+    
+    res.status(500).json({ 
+      error: 'Could not fetch Excel file', 
+      details: err.message
+    });
   }
 });
 
