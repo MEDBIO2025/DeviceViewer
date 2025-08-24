@@ -1,301 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel File Naming Debugger</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #2c3e50;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 40px auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        header {
-            background: #3498db;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-        
-        h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .description {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-        
-        .content {
-            padding: 25px;
-        }
-        
-        .info-section {
-            background: #e3f2fd;
-            border-left: 5px solid #2196f3;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-radius: 5px;
-        }
-        
-        .info-title {
-            color: #1565c0;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .card-title {
-            font-size: 18px;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .steps {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .steps li {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        
-        .code {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            margin: 15px 0;
-            overflow-x: auto;
-            font-size: 14px;
-            color: #d63384;
-        }
-        
-        .folder-structure {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-family: monospace;
-        }
-        
-        .folder {
-            color: #2980b9;
-            font-weight: bold;
-        }
-        
-        .file {
-            color: #8e44ad;
-            margin-left: 20px;
-        }
-        
-        .highlight {
-            background: #fff3cd;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 4px solid #ffc107;
-            margin: 15px 0;
-        }
-        
-        .naming-tool {
-            background: #e8f5e9;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            font-family: monospace;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                margin: 20px auto;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medical Device Scanner</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    header {
+      background: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      height: 60px;
+    }
+    .new-clinics-link {
+      position: absolute;
+      right: 0.5rem;
+      top: 8px;
+      font-weight: 600; 
+      font-size: 0.85rem; 
+      color: #555;
+      background-color: #e0e0e0;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+    .new-clinics-link:hover {
+      background-color: #cfcfcf;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      min-width: 700px;
+      table-layout: fixed;
+      word-wrap: break-word;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+    th { background: #f0f8ff; }
+    tr.selected { background: #d4edda; }
+    tr.unselected { background: #f8d7da; }
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .autocomplete-list {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: calc(100% - 2px);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .autocomplete-list div { 
+      cursor: pointer; 
+      padding: 0.6rem; 
+    }
+    .autocomplete-list div:hover { background: #f0f8ff; }
+    .form-group { 
+      margin-bottom: 1.5rem; 
+      position: relative; 
+    }
+    .button-group { 
+      margin-top: 1rem; 
+      text-align: center; 
+    }
+    button {
+      margin: 0 0.5rem;
+      background: #0078d4;
+      color: white;
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover { background: #005ea1; }
+    textarea.notes-input {
+      width: 100%;
+      resize: vertical;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-height: 50px;
+      font-size: 0.9rem;
+      padding: 5px;
+      font-family: inherit;
+    }
+    td.editable {
+      cursor: text;
+      background: #fffbea;
+      overflow-wrap: break-word;
+    }
+    td.editable:focus {
+      outline: 2px solid #0078d4;
+      background: #e0f0ff;
+    }
+    button.delete-btn {
+      background: #dc3545;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      margin: 0;
+    }
+    button.delete-btn:hover {
+      background: #a71d2a;
+    }
+    .loading {
+      text-align: center;
+      padding: 1rem;
+      font-style: italic;
+      color: #666;
+    }
+    .error {
+      color: #dc3545;
+      padding: 1rem;
+      background: #f8d7da;
+      border-radius: 4px;
+      margin: 1rem 0;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 768px) {
+      body, .container {
+        padding: 1rem;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        height: auto;
+      }
+      .new-clinics-link {
+        position: relative;
+        margin-top: 0.5rem;
+        align-self: flex-end;
+      }
+      table {
+        min-width: 600px;
+        font-size: 0.85rem;
+      }
+      th, td {
+        padding: 0.4rem 0.5rem;
+      }
+      button {
+        padding: 0.5rem 0.9rem;
+        font-size: 0.9rem;
+      }
+      textarea.notes-input {
+        min-height: 40px;
+        font-size: 0.85rem;
+      }
+    }
+    @media (max-width: 480px) {
+      table {
+        min-width: 500px;
+        font-size: 0.8rem;
+      }
+      th, td {
+        padding: 0.3rem 0.4rem;
+      }
+      button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+      }
+      textarea.notes-input {
+        min-height: 35px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Excel File Naming Debugger</h1>
-            <p class="description">Understand how your Excel files are named and located</p>
-        </header>
-        
-        <div class="content">
-            <div class="info-section">
-                <h2 class="info-title">How Excel File Naming Works</h2>
-                <p>Your application automatically generates Excel filenames based on the folder structure. The filename is created by combining the clinic name and subfolder name.</p>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">Filename Generation Logic</h3>
-                <p>Your server code creates the Excel filename using this pattern:</p>
-                <div class="code">// Server code constructs the filename like this:
-const parts = folderName.split('/');
-const fileNameBase = parts.join('_');
-const excelFileName = `${fileNameBase}_equipment_data.xlsx`;</div>
-                
-                <p>For a folder path like: <code>Oakridges Surgicentre/Oakridge Surgi Centre 2024 July</code></p>
-                <p>The server will look for: <code>Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code></p>
-                
-                <div class="highlight">
-                    <p><strong>But you mentioned your file is named:</strong> <code>Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code></p>
-                    <p>This suggests there might be a mismatch between your folder structure and file naming.</p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">Expected Folder Structure</h3>
-                <p>Your server expects files to be in this structure:</p>
-                <div class="folder-structure">
-                    <div class="folder">REPORTS</div>
-                    <div class="folder">Service Report 2020</div>
-                    <div class="folder">Oakridges Surgicentre (Clinic Name)</div>
-                    <div class="folder">Oakridge Surgi Centre 2024 July (Subfolder)</div>
-                    <div class="file">Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</div>
-                </div>
-                <p>But if your file is named <code>Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code>, it suggests the folder structure might be different.</p>
-            </div>
-            
-            <div class="naming-tool">
-                <h3 class="card-title">Filename Troubleshooter</h3>
-                <p>Enter your folder path to see what filename the server expects:</p>
-                
-                <div class="input-group">
-                    <label for="clinicName">Clinic Name:</label>
-                    <input type="text" id="clinicName" placeholder="e.g., Oakridges Surgicentre" value="Oakridges Surgicentre">
-                </div>
-                
-                <div class="input-group">
-                    <label for="subfolderName">Subfolder Name:</label>
-                    <input type="text" id="subfolderName" placeholder="e.g., Oakridge Surgi Centre 2024 July" value="Oakridge Surgi Centre 2024 July">
-                </div>
-                
-                <div class="result" id="fileNameResult">
-                    Server will look for: <strong>Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</strong>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">Possible Solutions</h3>
-                <p>Based on your file name, here are the possible solutions:</p>
-                
-                <div class="highlight">
-                    <p><strong>Option 1: Rename your Excel file</strong></p>
-                    <p>Change the filename to match the expected pattern: <code>Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</code></p>
-                </div>
-                
-                <div class="highlight">
-                    <p><strong>Option 2: Modify your server code</strong></p>
-                    <p>Change the filename generation logic to match your naming convention:</p>
-                    <div class="code">// Alternative 1: Use only the subfolder name
-const excelFileName = `Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx`;
+<header>
+  <img 
+    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsIz5ldp6L3p2gzRI_1AQ2xxSIpx1xuYby5A&s" 
+    alt="Logo" 
+    style="height: 55px; object-fit: contain;"
+  />
+  <a 
+    href="https://medicaldevicescanner.onrender.com" 
+    target="_blank" 
+    rel="noopener" 
+    class="new-clinics-link"
+  >
+    New Clinics
+  </a>
+</header>
 
-// Alternative 2: Use only the last part of the path
-const parts = folderName.split('/');
-const subfolderOnly = parts[parts.length - 1];
-const excelFileName = `${subfolderOnly}_equipment_data.xlsx`;
+<div class="container">
+  <h2>Medical Device Viewer</h2>
 
-// Alternative 3: Custom naming logic
-const excelFileName = generateExcelFileName(folderName);</div>
-                </div>
-                
-                <div class="highlight">
-                    <p><strong>Option 3: Restructure your folders</strong></p>
-                    <p>Change your folder structure so the clinic name is not part of the path, or adjust it to match your filename pattern.</p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3 class="card-title">Debugging Steps</h3>
-                <ol class="steps">
-                    <li>Check your exact folder structure in OneDrive</li>
-                    <li>Verify the actual filename of your Excel file</li>
-                    <li>Compare with what the server expects using the tool above</li>
-                    <li>Either rename the file or modify your server code to match</li>
-                    <li>Test with a simple folder structure first</li>
-                </ol>
-            </div>
-        </div>
-    </div>
+  <div class="form-group">
+    <label for="clinicSearch">Search Clinic:</label>
+    <input type="text" id="clinicSearch" placeholder="Type to search..." oninput="filterSuggestions()">
+    <div id="autocompleteResults" class="autocomplete-list"></div>
+  </div>
 
-    <script>
-        // Update filename when inputs change
-        document.getElementById('clinicName').addEventListener('input', updateFileName);
-        document.getElementById('subfolderName').addEventListener('input', updateFileName);
-        
-        function updateFileName() {
-            const clinicName = document.getElementById('clinicName').value;
-            const subfolderName = document.getElementById('subfolderName').value;
-            
-            // Simulate the server's filename generation
-            const folderPath = `${clinicName}/${subfolderName}`;
-            const parts = folderPath.split('/');
-            const fileNameBase = parts.join('_');
-            const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
-            
-            document.getElementById('fileNameResult').innerHTML = 
-                `Server will look for: <strong>${excelFileName}</strong>`;
-        }
-    </script>
+  <div class="form-group">
+    <label for="subFolder">Select Subfolder:</label>
+    <select id="subFolder" onchange="loadExcel()" disabled>
+      <option disabled selected>Select a clinic first</option>
+    </select>
+  </div>
+
+  <div class="button-group">
+    <button onclick="addRow()">Add New Row</button>
+    <button onclick="saveSelected()">Save Selected</button>
+  </div>
+
+  <div id="loadingMessage" class="loading">Select a clinic and subfolder to load data</div>
+  <div id="excelTable"></div>
+</div>
+
+<script>
+let allClientFolders = [];
+let rowsData = [];
+
+const HEADER_LABELS = {
+  device_type: 'Device Type',
+  manufacturer: 'Manufacturer',
+  model: 'Model',
+  serial: 'Serial Number',
+  notes: 'Notes'
+};
+
+async function loadClientFolders() {
+  try {
+    document.getElementById('loadingMessage').textContent = 'Loading clinics...';
+    const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020`);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    const folders = await res.json();
+    allClientFolders = folders;
+    document.getElementById('loadingMessage').textContent = 'Select a clinic and subfolder to load data';
+  } catch (err) {
+    console.error('Error loading folders:', err);
+    document.getElementById('loadingMessage').textContent = 'Error loading clinics: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
+  }
+}
+
+function filterSuggestions() {
+  const input = document.getElementById('clinicSearch').value.toLowerCase();
+  const results = document.getElementById('autocompleteResults');
+  results.innerHTML = '';
+  
+  if (input.length < 2) return;
+  
+  const filtered = allClientFolders.filter(f => f.toLowerCase().includes(input)).slice(0, 10);
+  
+  if (filtered.length === 0) {
+    const div = document.createElement('div');
+    div.textContent = 'No matching clinics found';
+    results.appendChild(div);
+    return;
+  }
+  
+  filtered.forEach(name => {
+    const div = document.createElement('div');
+    div.textContent = name;
+    div.onclick = () => {
+      document.getElementById('clinicSearch').value = name;
+      loadSubfolders(name);
+      results.innerHTML = '';
+    };
+    results.appendChild(div);
+  });
+}
+
+async function loadSubfolders(clientFolder) {
+  try {
+    document.getElementById('loadingMessage').textContent = `Loading subfolders for ${clientFolder}...`;
+    const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020/${encodeURIComponent(clientFolder)}`);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    const folders = await res.json();
+    const select = document.getElementById('subFolder');
+    select.innerHTML = '<option disabled selected>Select a subfolder</option>';
+    folders.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = `${clientFolder}/${f}`;
+      opt.textContent = f;
+      select.appendChild(opt);
+    });
+    select.disabled = false;
+    document.getElementById('loadingMessage').textContent = 'Select a subfolder to load data';
+  } catch (err) {
+    console.error('Error loading subfolders:', err);
+    document.getElementById('loadingMessage').textContent = 'Error loading subfolders: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
+  }
+}
+
+async function loadExcel() {
+  const path = document.getElementById('subFolder').value;
+  if (!path) return;
+
+  try {
+    document.getElementById('loadingMessage').textContent = 'Loading Excel data...';
+    document.getElementById('loadingMessage').className = 'loading';
+    document.getElementById('excelTable').innerHTML = '';
+    
+    const res = await fetch(`/api/excel-data?folderName=${encodeURIComponent(path)}`);
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+    }
+    
+    const data = await res.json();
+    
+    // Check if we have valid data
+    if (!data.rows || !Array.isArray(data.rows)) {
+      throw new Error('Invalid data format received from server');
+    }
+    
+    // Map the data to our expected format
+    rowsData = data.rows.map(row => ({
+      device_type: row['Device Type'] || row['device_type'] || '',
+      manufacturer: row['Manufacturer'] || row['manufacturer'] || '',
+      model: row['Model'] || row['model'] || '',
+      serial: row['Serial Number'] || row['serial'] || '',
+      notes: row['notes'] || '',
+      selected: row['selected'] || false
+    }));
+    
+    renderTable();
+    document.getElementById('loadingMessage').textContent = '';
+    
+  } catch (err) {
+    console.error('Error loading Excel:', err);
+    document.getElementById('loadingMessage').textContent = 'Error loading Excel: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
+  }
+}
+
+function renderTable() {
+  const tableDiv = document.getElementById('excelTable');
+  if (rowsData.length === 0) {
+    tableDiv.innerHTML = '<p>No data found.</p>';
+    return;
+  }
+  
+  const headers = ['device_type', 'manufacturer', 'model', 'serial', 'notes'];
+  
+  const table = document.createElement('table');
+  const headRow = document.createElement('tr');
+  
+  // Add checkbox column header
+  const selectTh = document.createElement('th');
+  selectTh.textContent = 'Select';
+  selectTh.style.width = '60px';
+  headRow.appendChild(selectTh);
+  
+  // Add data column headers
+  headers.forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = HEADER_LABELS[h] || h.charAt(0).toUpperCase() + h.slice(1);
+    headRow.appendChild(th);
+  });
+  
+  // Add delete column header
+  const deleteTh = document.createElement('th');
+  deleteTh.textContent = 'Delete';
+  deleteTh.style.width = '70px';
+  headRow.appendChild(deleteTh);
+  
+  table.appendChild(headRow);
+
+  rowsData.forEach((row, i) => {
+    const tr = document.createElement('tr');
+
+    // Checkbox cell
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = !!row.selected;
+    tr.className = checkbox.checked ? 'selected' : 'unselected';
+    checkbox.onchange = () => {
+      tr.className = checkbox.checked ? 'selected' : 'unselected';
+      row.selected = checkbox.checked;
+    };
+    const checkTd = document.createElement('td');
+    checkTd.style.textAlign = "center";
+    checkTd.appendChild(checkbox);
+    tr.appendChild(checkTd);
+
+    // Data cells editable
+    headers.forEach(h => {
+      const td = document.createElement('td');
+      if (h === 'notes') {
+        const textarea = document.createElement('textarea');
+        textarea.className = 'notes-input';
+        textarea.value = row[h] || '';
+        textarea.oninput = () => { row[h] = textarea.value; };
+        td.appendChild(textarea);
+      } else {
+        td.contentEditable = true;
+        td.classList.add('editable');
+        td.textContent = row[h] || '';
+        td.oninput = () => {
+          row[h] = td.textContent.trim();
+        };
+      }
+      tr.appendChild(td);
+    });
+
+    // Delete button cell
+    const delTd = document.createElement('td');
+    delTd.style.textAlign = "center";
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Delete';
+    delBtn.className = 'delete-btn';
+    delBtn.onclick = () => {
+      if (confirm('Are you sure you want to delete this row?')) {
+        rowsData.splice(i, 1);
+        renderTable();
+      }
+    };
+    delTd.appendChild(delBtn);
+    tr.appendChild(delTd);
+
+    table.appendChild(tr);
+  });
+
+  tableDiv.innerHTML = '';
+  tableDiv.appendChild(table);
+}
+
+function addRow() {
+  const newRow = { 
+    device_type: '', 
+    manufacturer: '', 
+    model: '', 
+    serial: '', 
+    notes: '', 
+    selected: false 
+  };
+  rowsData.push(newRow);
+  renderTable();
+}
+
+async function saveSelected() {
+  if (rowsData.length === 0) {
+    alert('No data to save!');
+    return;
+  }
+
+  const path = document.getElementById('subFolder').value;
+  if (!path) {
+    alert('Please select a subfolder first');
+    return;
+  }
+
+  try {
+    document.getElementById('loadingMessage').textContent = 'Saving data...';
+    document.getElementById('loadingMessage').className = 'loading';
+    
+    const res = await fetch('/api/save-excel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ folderName: path, rows: rowsData })
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      document.getElementById('loadingMessage').textContent = 'Saved successfully to cloud!';
+      document.getElementById('loadingMessage').className = 'loading';
+      setTimeout(() => {
+        document.getElementById('loadingMessage').textContent = '';
+      }, 2000);
+    } else {
+      throw new Error(result.error || 'Unknown error');
+    }
+  } catch (err) {
+    console.error('Error saving:', err);
+    document.getElementById('loadingMessage').textContent = 'Save failed: ' + err.message;
+    document.getElementById('loadingMessage').className = 'error';
+  }
+}
+
+// Initialize when page loads
+window.onload = function() {
+  loadClientFolders();
+  
+  // Close autocomplete when clicking outside
+  document.addEventListener('click', function(e) {
+    if (e.target.id !== 'clinicSearch') {
+      document.getElementById('autocompleteResults').innerHTML = '';
+    }
+  });
+};
+</script>
 </body>
-</html>
+</html> 
