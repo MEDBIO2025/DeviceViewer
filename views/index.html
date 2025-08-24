@@ -290,16 +290,19 @@ async function loadExcel() {
     const res = await fetch(`/api/excel-data?folderName=${encodeURIComponent(path)}`);
     const data = await res.json();
 
-    // Skip first 6 rows if they exist in JSON
-    rowsData = data.rows.slice(6).map(row => {
-      const cleanRow = {};
-      for (const key in row) {
-        if (!key.toLowerCase().includes('duplicate')) {
-          cleanRow[key] = row[key];
-        }
-      }
-      if (!('notes' in cleanRow)) cleanRow.notes = '';
-      if (!('selected' in cleanRow)) cleanRow.selected = false;
+    // The backend sends rows including header rows; we skip first 6
+    const rowsAfterHeader = data.rows.slice(6);
+
+    rowsData = rowsAfterHeader.map(row => {
+      // Map the headers exactly
+      const cleanRow = {
+        'Device Type': row['Device Type'] || '',
+        'Manufacturer': row['Manufacturer'] || '',
+        'Model': row['Model'] || '',
+        'Serial Number': row['Serial Number'] || '',
+        'notes': row['notes'] || '',
+        selected: row['selected'] || false
+      };
       return cleanRow;
     });
 
@@ -309,6 +312,7 @@ async function loadExcel() {
     document.getElementById('excelTable').innerHTML = `<p>Error loading Excel: ${err.message}</p>`;
   }
 }
+
 
 
 
