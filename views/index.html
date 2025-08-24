@@ -1,718 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Medical Device Scanner</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f8f9fa;
-      color: #333;
-    }
-    h2 {
-      text-align: center;
-      margin-top: 1rem;
-    }
-    header {
-      background: #fff;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-bottom: 1px solid #ddd;
-      position: relative;
-      max-width: 900px;
-      margin: 0 auto;
-      height: 60px;
-    }
-    .new-clinics-link {
-      position: absolute;
-      right: 0.5rem;
-      top: 8px;
-      font-weight: 600; 
-      font-size: 0.85rem; 
-      color: #555;
-      background-color: #e0e0e0;
-      padding: 0.2rem 0.5rem;
-      border-radius: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s ease;
-      white-space: nowrap;
-    }
-    .new-clinics-link:hover {
-      background-color: #cfcfcf;
-    }
-    .container {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 2rem;
-      min-width: 700px;
-      table-layout: fixed;
-      word-wrap: break-word;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.5rem 0.75rem;
-      text-align: left;
-      vertical-align: middle;
-      font-size: 0.9rem;
-    }
-    th { background: #f0f8ff; }
-    tr.selected { background: #d4edda; }
-    tr.unselected { background: #f8d7da; }
-    input[type="text"], select {
-      width: 100%;
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .autocomplete-list {
-      position: absolute;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      width: calc(100% - 2px);
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 100;
-    }
-    .autocomplete-list div { 
-      cursor: pointer; 
-      padding: 0.6rem; 
-    }
-    .autocomplete-list div:hover { background: #f0f8ff; }
-    .form-group { 
-      margin-bottom: 1.5rem; 
-      position: relative; 
-    }
-    .button-group { 
-      margin-top: 1rem; 
-      text-align: center; 
-    }
-    button {
-      margin: 0 0.5rem;
-      background: #0078d4;
-      color: white;
-      padding: 0.6rem 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-    button:hover { background: #005ea1; }
-    textarea.notes-input {
-      width: 100%;
-      resize: vertical;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      min-height: 50px;
-      font-size: 0.9rem;
-      padding: 5px;
-      font-family: inherit;
-    }
-    td.editable {
-      cursor: text;
-      background: #fffbea;
-      overflow-wrap: break-word;
-    }
-    td.editable:focus {
-      outline: 2px solid #0078d4;
-      background: #e0f0ff;
-    }
-    button.delete-btn {
-      background: #dc3545;
-      padding: 0.3rem 0.6rem;
-      font-size: 0.85rem;
-      border-radius: 4px;
-      margin: 0;
-    }
-    button.delete-btn:hover {
-      background: #a71d2a;
-    }
-    .loading {
-      text-align: center;
-      padding: 1rem;
-      font-style: italic;
-      color: #666;
-    }
-    .error {
-      color: #dc3545;
-      padding: 1rem;
-      background: #f8d7da;
-      border-radius: 4px;
-      margin: 1rem 0;
-    }
-
-    /* Debug panel styles */
-    .debug-panel {
-      background: #2c3e50;
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 20px;
-      display: none;
-    }
-    .debug-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-    .debug-title {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .debug-toggle {
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .debug-content {
-      font-family: monospace;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .debug-section {
-      margin-bottom: 15px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
-    .debug-test {
-      margin-top: 10px;
-    }
-    .debug-btn {
-      background: #3498db;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-right: 10px;
-      font-size: 14px;
-    }
-    .debug-result {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 4px;
-      display: none;
-    }
-    .debug-success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 1px solid #4caf50;
-    }
-    .debug-failure {
-      background: #ffebee;
-      color: #d32f2f;
-      border: 1px solid #f44336;
-    }
-
-    /* Mobile tweaks */
-    @media (max-width: 768px) {
-      body, .container {
-        padding: 1rem;
-      }
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 1rem;
-        height: auto;
-      }
-      .new-clinics-link {
-        position: relative;
-        margin-top: 0.5rem;
-        align-self: flex-end;
-      }
-      table {
-        min-width: 600px;
-        font-size: 0.85rem;
-      }
-      th, td {
-        padding: 0.4rem 0.5rem;
-      }
-      button {
-        padding: 0.5rem 0.9rem;
-        font-size: 0.9rem;
-      }
-      textarea.notes-input {
-        min-height: 40px;
-        font-size: 0.85rem;
-      }
-    }
-    @media (max-width: 480px) {
-      table {
-        min-width: 500px;
-        font-size: 0.8rem;
-      }
-      th, td {
-        padding: 0.3rem 0.4rem;
-      }
-      button {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-      }
-      textarea.notes-input {
-        min-height: 35px;
-        font-size: 0.8rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Load Error Debugger</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #3498db;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 25px;
+        }
+        
+        .error-section {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        
+        .error-title {
+            color: #d32f2f;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .error-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        
+        .solution-section {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        
+        .solution-title {
+            color: #388e3c;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .steps {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .steps li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 14px;
+            color: #d63384;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-btn {
+            background: #9b59b6;
+        }
+        
+        .test-btn:hover {
+            background: #8e44ad;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+        }
+        
+        .failure {
+            background: #ffebee;
+            border: 1px solid #f44336;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        
+        .folder-structure {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+        
+        .folder {
+            color: #2980b9;
+            font-weight: bold;
+        }
+        
+        .file {
+            color: #8e44ad;
+            margin-left: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-<header>
-  <img 
-    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsIz5ldp6L3p2gzRI_1AQ2xxSIpx1xuYby5A&s" 
-    alt="Logo" 
-    style="height: 55px; object-fit: contain;"
-  />
-  <a 
-    href="https://medicaldevicescanner.onrender.com" 
-    target="_blank" 
-    rel="noopener" 
-    class="new-clinics-link"
-  >
-    New Clinics
-  </a>
-</header>
-
-<div class="container">
-  <h2>Medical Device Viewer</h2>
-
-  <div class="form-group">
-    <label for="clinicSearch">Search Clinic:</label>
-    <input type="text" id="clinicSearch" placeholder="Type to search..." oninput="filterSuggestions()">
-    <div id="autocompleteResults" class="autocomplete-list"></div>
-  </div>
-
-  <div class="form-group">
-    <label for="subFolder">Select Subfolder:</label>
-    <select id="subFolder" onchange="loadExcel()" disabled>
-      <option disabled selected>Select a clinic first</option>
-    </select>
-  </div>
-
-  <div class="button-group">
-    <button onclick="addRow()">Add New Row</button>
-    <button onclick="saveSelected()">Save Selected</button>
-    <button class="debug-toggle" onclick="toggleDebug()">Debug</button>
-  </div>
-
-  <div id="loadingMessage" class="loading">Select a clinic and subfolder to load data</div>
-  <div id="excelTable"></div>
-
-  <!-- Debug Panel -->
-  <div id="debugPanel" class="debug-panel">
-    <div class="debug-header">
-      <div class="debug-title">401 Error Debugger</div>
-      <button class="debug-toggle" onclick="toggleDebug()">Hide</button>
-    </div>
+    <div class="container">
+        <header>
+            <h1>Excel Data Load Error Debugger</h1>
+            <p class="description">Fix server 500 errors when loading Excel data from OneDrive</p>
+        </header>
+        
+        <div class="content">
+            <div class="error-section">
+                <h2 class="error-title">Error: Server 500 Internal Error</h2>
+                <p>Your server is returning a 500 status code, which indicates an internal server error when trying to load Excel data.</p>
+                <div class="error-log">
+GET https://deviceviewer.onrender.com/api/excel-data?folderName=__Oakridges%20Surgicentre%2FOakridge%20Surgi%20Centre%202024%20July 500 (Internal Server Error)
+                </div>
+                <p>This error occurs when the server encounters an unexpected condition that prevents it from fulfilling the request.</p>
+            </div>
+            
+            <div class="solution-section">
+                <h2 class="solution-title">Quick Fixes</h2>
+                <p>The 500 error indicates a server-side issue. Here are the most likely solutions:</p>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">1. Check Server Logs</h3>
+                <p>The 500 error is a generic server error. You need to check your server logs for more specific information:</p>
+                <ul class="steps">
+                    <li>Access your server console on Render.com</li>
+                    <li>Look for error messages related to the Excel data loading</li>
+                    <li>Check for authentication errors with Microsoft Graph API</li>
+                    <li>Look for file path or permission issues</li>
+                </ul>
+                <div class="code">// Example of what to look for in server logs
+Error: Invalid authentication token
+Error: File not found
+Error: The specified item could not be found in the drive
+Error: Permission denied</div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">2. Verify File Path and Naming</h3>
+                <p>Your server is looking for an Excel file with a specific naming pattern:</p>
+                <div class="code">// Server code constructs the filename like this:
+const parts = folderName.split('/');
+const fileNameBase = parts.join('_');
+const excelFileName = `${fileNameBase}_equipment_data.xlsx`;</div>
+                <p>For your folder path, the server is looking for:</p>
+                <div class="code">__Oakridges_Surgicentre_Oakridge_Surgi_Centre_2024_July_equipment_data.xlsx</div>
+                <p>Make sure:</p>
+                <ul class="steps">
+                    <li>The Excel file exists with this exact name</li>
+                    <li>The file is in the correct folder in OneDrive</li>
+                    <li>There are no typos in the folder or file names</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">3. Test API Connection</h3>
+                <p>Use the button below to test if your server can connect to the Microsoft Graph API:</p>
+                <button class="btn test-btn" onclick="testAPIConnection()">Test API Connection</button>
+                <div id="testResult" class="result"></div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">4. Verify Authentication</h3>
+                <p>Your server uses the Microsoft Graph API to access OneDrive files. Ensure:</p>
+                <ul class="steps">
+                    <li>Your Azure AD credentials are correct (TENANT_ID, CLIENT_ID, CLIENT_SECRET)</li>
+                    <li>Your Azure App has the necessary permissions (Files.ReadWrite.All)</li>
+                    <li>Your access token is valid and not expired</li>
+                    <li>The ONEDRIVE_USER has access to the files</li>
+                </ul>
+                <div class="highlight">
+                    <p><strong>Most Common Cause:</strong> Expired client secret or incorrect API permissions.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">5. Debug Your Server Code</h3>
+                <p>Add detailed error logging to your server to identify the exact issue:</p>
+                <div class="code">// Enhanced error handling for /api/excel-data endpoint
+app.get('/api/excel-data', requireLogin, async (req, res) => {
+  const { folderName } = req.query;
+  console.log('Fetching Excel data for folder:', folderName);
+  
+  try {
+    const token = await getAccessToken();
+    console.log('Access token acquired successfully');
     
-    <div class="debug-content">
-      <div class="debug-section">
-        <strong>Error:</strong> 401 Unauthorized - Authentication failed
-      </div>
-      
-      <div class="debug-section">
-        <strong>Quick Fixes:</strong>
-        <ul>
-          <li>Check if you're logged in (session might have expired)</li>
-          <li>Verify Azure AD credentials are correct</li>
-          <li>Ensure your Azure App has proper permissions</li>
-        </ul>
-      </div>
-      
-      <div class="debug-section">
-        <strong>Diagnostic Tests:</strong>
-        <div class="debug-test">
-          <button class="debug-btn" onclick="testAuth()">Test Authentication</button>
-          <button class="debug-btn" onclick="testServer()">Test Server Connection</button>
-          <div id="debugResult" class="debug-result"></div>
+    const parts = folderName.split('/');
+    const fileNameBase = parts.join('_');
+    const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
+    console.log('Looking for Excel file:', excelFileName);
+
+    const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
+    console.log('OneDrive file URL:', fileUrl);
+
+    const response = await axios.get(fileUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: 'arraybuffer'
+    });
+    
+    console.log('Excel file downloaded successfully');
+    
+    // Process the Excel file...
+    
+  } catch (err) {
+    console.error('Detailed Excel fetch error:', {
+      message: err.message,
+      stack: err.stack,
+      response: err.response?.data
+    });
+    
+    res.status(500).json({ 
+      error: 'Could not fetch Excel file', 
+      details: err.message
+    });
+  }
+});</div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">6. Check File Existence</h3>
+                <p>Before trying to download the Excel file, check if it exists:</p>
+                <div class="code">// Add this to your /api/excel-data endpoint
+// After getting the token, check if file exists
+const fileCheckUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}`;
+
+try {
+  const fileCheck = await axios.get(fileCheckUrl, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  console.log('File found:', fileCheck.data);
+} catch (err) {
+  console.error('File not found. Please check the path and filename.');
+  throw new Error(`Excel file not found: ${excelFileName}`);
+}</div>
+            </div>
         </div>
-      </div>
-      
-      <div class="debug-section">
-        <strong>Current Status:</strong>
-        <div id="debugStatus">Ready to test...</div>
-      </div>
     </div>
-  </div>
-</div>
 
-<script>
-let allClientFolders = [];
-let rowsData = [];
-
-const HEADER_LABELS = {
-  device_type: 'Device Type',
-  manufacturer: 'Manufacturer',
-  model: 'Model',
-  serial: 'Serial Number',
-  notes: 'Notes'
-};
-
-// Debug functions
-function toggleDebug() {
-  const debugPanel = document.getElementById('debugPanel');
-  debugPanel.style.display = debugPanel.style.display === 'none' ? 'block' : 'none';
-}
-
-function testAuth() {
-  const resultDiv = document.getElementById('debugResult');
-  resultDiv.style.display = 'block';
-  resultDiv.className = 'debug-result';
-  resultDiv.innerHTML = '<p>Testing authentication status...</p>';
-  document.getElementById('debugStatus').textContent = 'Testing authentication...';
-  
-  fetch('/api/list-folders')
-    .then(response => {
-      if (response.status === 401) {
-        throw new Error('Not authenticated (401)');
-      }
-      return response.json();
-    })
-    .then(data => {
-      resultDiv.classList.add('debug-success');
-      resultDiv.innerHTML = `
-        <p>✅ You are authenticated successfully!</p>
-        <p>Found ${data.length} folders.</p>
-      `;
-      document.getElementById('debugStatus').textContent = 'Authentication successful';
-    })
-    .catch(error => {
-      resultDiv.classList.add('debug-failure');
-      resultDiv.innerHTML = `
-        <p>❌ Authentication failed: ${error.message}</p>
-        <p>Please <a href="/login.html" style="color: #d32f2f;">log in again</a>.</p>
-      `;
-      document.getElementById('debugStatus').textContent = 'Authentication failed';
-    });
-}
-
-function testServer() {
-  const resultDiv = document.getElementById('debugResult');
-  resultDiv.style.display = 'block';
-  resultDiv.className = 'debug-result';
-  resultDiv.innerHTML = '<p>Testing server connection...</p>';
-  document.getElementById('debugStatus').textContent = 'Testing server connection...';
-  
-  fetch('/api/list-folders')
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(`Server returned ${response.status}`);
-    })
-    .then(data => {
-      resultDiv.classList.add('debug-success');
-      resultDiv.innerHTML = `
-        <p>✅ Server connection successful!</p>
-        <p>Server is responding to API requests.</p>
-      `;
-      document.getElementById('debugStatus').textContent = 'Server connection successful';
-    })
-    .catch(error => {
-      resultDiv.classList.add('debug-failure');
-      resultDiv.innerHTML = `
-        <p>❌ Server connection failed: ${error.message}</p>
-        <p>This suggests an authentication issue on the server side.</p>
-      `;
-      document.getElementById('debugStatus').textContent = 'Server connection failed';
-    });
-}
-
-// Original functions
-async function loadClientFolders() {
-  try {
-    document.getElementById('loadingMessage').textContent = 'Loading clinics...';
-    const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020`);
-    if (!res.ok) {
-      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
-    }
-    const folders = await res.json();
-    allClientFolders = folders;
-    document.getElementById('loadingMessage').textContent = 'Select a clinic and subfolder to load data';
-  } catch (err) {
-    console.error('Error loading folders:', err);
-    document.getElementById('loadingMessage').textContent = 'Error loading clinics: ' + err.message;
-    document.getElementById('loadingMessage').className = 'error';
-  }
-}
-
-function filterSuggestions() {
-  const input = document.getElementById('clinicSearch').value.toLowerCase();
-  const results = document.getElementById('autocompleteResults');
-  results.innerHTML = '';
-  
-  if (input.length < 2) return;
-  
-  const filtered = allClientFolders.filter(f => f.toLowerCase().includes(input)).slice(0, 10);
-  
-  if (filtered.length === 0) {
-    const div = document.createElement('div');
-    div.textContent = 'No matching clinics found';
-    results.appendChild(div);
-    return;
-  }
-  
-  filtered.forEach(name => {
-    const div = document.createElement('div');
-    div.textContent = name;
-    div.onclick = () => {
-      document.getElementById('clinicSearch').value = name;
-      loadSubfolders(name);
-      results.innerHTML = '';
-    };
-    results.appendChild(div);
-  });
-}
-
-async function loadSubfolders(clientFolder) {
-  try {
-    document.getElementById('loadingMessage').textContent = `Loading subfolders for ${clientFolder}...`;
-    const res = await fetch(`/api/list-folders?path=REPORTS/Service Report 2020/${encodeURIComponent(clientFolder)}`);
-    if (!res.ok) {
-      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
-    }
-    const folders = await res.json();
-    const select = document.getElementById('subFolder');
-    select.innerHTML = '<option disabled selected>Select a subfolder</option>';
-    folders.forEach(f => {
-      const opt = document.createElement('option');
-      opt.value = `${clientFolder}/${f}`;
-      opt.textContent = f;
-      select.appendChild(opt);
-    });
-    select.disabled = false;
-    document.getElementById('loadingMessage').textContent = 'Select a subfolder to load data';
-  } catch (err) {
-    console.error('Error loading subfolders:', err);
-    document.getElementById('loadingMessage').textContent = 'Error loading subfolders: ' + err.message;
-    document.getElementById('loadingMessage').className = 'error';
-  }
-}
-
-async function loadExcel() {
-  const path = document.getElementById('subFolder').value;
-  if (!path) return;
-
-  try {
-    document.getElementById('loadingMessage').textContent = 'Loading Excel data...';
-    document.getElementById('loadingMessage').className = 'loading';
-    document.getElementById('excelTable').innerHTML = '';
-    
-    const res = await fetch(`/api/excel-data?folderName=${encodeURIComponent(path)}`);
-    if (!res.ok) {
-      throw new Error(`Server returned ${res.status}: ${res.statusText}`);
-    }
-    
-    const data = await res.json();
-    
-    // Check if we have valid data
-    if (!data.rows || !Array.isArray(data.rows)) {
-      throw new Error('Invalid data format received from server');
-    }
-    
-    // Map the data to our expected format
-    rowsData = data.rows.map(row => ({
-      device_type: row['Device Type'] || row['device_type'] || '',
-      manufacturer: row['Manufacturer'] || row['manufacturer'] || '',
-      model: row['Model'] || row['model'] || '',
-      serial: row['Serial Number'] || row['serial'] || '',
-      notes: row['notes'] || '',
-      selected: row['selected'] || false
-    }));
-    
-    renderTable();
-    document.getElementById('loadingMessage').textContent = '';
-    
-  } catch (err) {
-    console.error('Error loading Excel:', err);
-    document.getElementById('loadingMessage').textContent = 'Error loading Excel: ' + err.message;
-    document.getElementById('loadingMessage').className = 'error';
-  }
-}
-
-function renderTable() {
-  const tableDiv = document.getElementById('excelTable');
-  if (rowsData.length === 0) {
-    tableDiv.innerHTML = '<p>No data found.</p>';
-    return;
-  }
-  
-  const headers = ['device_type', 'manufacturer', 'model', 'serial', 'notes'];
-  
-  const table = document.createElement('table');
-  const headRow = document.createElement('tr');
-  
-  // Add checkbox column header
-  const selectTh = document.createElement('th');
-  selectTh.textContent = 'Select';
-  selectTh.style.width = '60px';
-  headRow.appendChild(selectTh);
-  
-  // Add data column headers
-  headers.forEach(h => {
-    const th = document.createElement('th');
-    th.textContent = HEADER_LABELS[h] || h.charAt(0).toUpperCase() + h.slice(1);
-    headRow.appendChild(th);
-  });
-  
-  // Add delete column header
-  const deleteTh = document.createElement('th');
-  deleteTh.textContent = 'Delete';
-  deleteTh.style.width = '70px';
-  headRow.appendChild(deleteTh);
-  
-  table.appendChild(headRow);
-
-  rowsData.forEach((row, i) => {
-    const tr = document.createElement('tr');
-
-    // Checkbox cell
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = !!row.selected;
-    tr.className = checkbox.checked ? 'selected' : 'unselected';
-    checkbox.onchange = () => {
-      tr.className = checkbox.checked ? 'selected' : 'unselected';
-      row.selected = checkbox.checked;
-    };
-    const checkTd = document.createElement('td');
-    checkTd.style.textAlign = "center";
-    checkTd.appendChild(checkbox);
-    tr.appendChild(checkTd);
-
-    // Data cells editable
-    headers.forEach(h => {
-      const td = document.createElement('td');
-      if (h === 'notes') {
-        const textarea = document.createElement('textarea');
-        textarea.className = 'notes-input';
-        textarea.value = row[h] || '';
-        textarea.oninput = () => { row[h] = textarea.value; };
-        td.appendChild(textarea);
-      } else {
-        td.contentEditable = true;
-        td.classList.add('editable');
-        td.textContent = row[h] || '';
-        td.oninput = () => {
-          row[h] = td.textContent.trim();
-        };
-      }
-      tr.appendChild(td);
-    });
-
-    // Delete button cell
-    const delTd = document.createElement('td');
-    delTd.style.textAlign = "center";
-    const delBtn = document.createElement('button');
-    delBtn.textContent = 'Delete';
-    delBtn.className = 'delete-btn';
-    delBtn.onclick = () => {
-      if (confirm('Are you sure you want to delete this row?')) {
-        rowsData.splice(i, 1);
-        renderTable();
-      }
-    };
-    delTd.appendChild(delBtn);
-    tr.appendChild(delTd);
-
-    table.appendChild(tr);
-  });
-
-  tableDiv.innerHTML = '';
-  tableDiv.appendChild(table);
-}
-
-function addRow() {
-  const newRow = { 
-    device_type: '', 
-    manufacturer: '', 
-    model: '', 
-    serial: '', 
-    notes: '', 
-    selected: false 
-  };
-  rowsData.push(newRow);
-  renderTable();
-}
-
-async function saveSelected() {
-  if (rowsData.length === 0) {
-    alert('No data to save!');
-    return;
-  }
-
-  const path = document.getElementById('subFolder').value;
-  if (!path) {
-    alert('Please select a subfolder first');
-    return;
-  }
-
-  try {
-    document.getElementById('loadingMessage').textContent = 'Saving data...';
-    document.getElementById('loadingMessage').className = 'loading';
-    
-    const res = await fetch('/api/save-excel', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ folderName: path, rows: rowsData })
-    });
-
-    const result = await res.json();
-
-    if (res.ok) {
-      document.getElementById('loadingMessage').textContent = 'Saved successfully to cloud!';
-      document.getElementById('loadingMessage').className = 'loading';
-      setTimeout(() => {
-        document.getElementById('loadingMessage').textContent = '';
-      }, 2000);
-    } else {
-      throw new Error(result.error || 'Unknown error');
-    }
-  } catch (err) {
-    console.error('Error saving:', err);
-    document.getElementById('loadingMessage').textContent = 'Save failed: ' + err.message;
-    document.getElementById('loadingMessage').className = 'error';
-  }
-}
-
-// Initialize when page loads
-window.onload = function() {
-  loadClientFolders();
-  
-  // Close autocomplete when clicking outside
-  document.addEventListener('click', function(e) {
-    if (e.target.id !== 'clinicSearch') {
-      document.getElementById('autocompleteResults').innerHTML = '';
-    }
-  });
-  
-  // Show debug panel if there's an error in the URL
-  if (window.location.search.includes('error=401')) {
-    document.getElementById('debugPanel').style.display = 'block';
-  }
-};
-</script>
+    <script>
+        function testAPIConnection() {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = '<p>Testing API connection...</p>';
+            
+            fetch('/api/list-folders?path=REPORTS/Service Report 2020')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error(`Server returned ${response.status}`);
+                })
+                .then(data => {
+                    resultDiv.classList.add('success');
+                    resultDiv.innerHTML = `
+                        <p>✅ API connection successful!</p>
+                        <p>Found ${data.length} folders in "REPORTS/Service Report 2020":</p>
+                        <ul>${data.map(folder => `<li>${folder}</li>`).join('')}</ul>
+                    `;
+                })
+                .catch(error => {
+                    resultDiv.classList.add('failure');
+                    resultDiv.innerHTML = `
+                        <p>❌ API connection failed: ${error.message}</p>
+                        <p>This suggests an issue with your server configuration or authentication.</p>
+                    `;
+                });
+        }
+        
+        // Display environment info (if available)
+        console.log("Server 500 Error Debugger loaded. Check the server-side issues mentioned above.");
+    </script>
 </body>
 </html>
