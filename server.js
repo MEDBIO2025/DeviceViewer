@@ -95,6 +95,7 @@ app.get('/api/list-folders', requireLogin, async (req, res) => {
     res.status(500).json({ error: 'Failed to list folders', details: err.message });
   }
 });
+
 app.get('/api/excel-data', requireLogin, async (req, res) => {
   const { folderName } = req.query;
   if (!folderName) return res.status(400).json({ error: 'Missing folderName' });
@@ -102,19 +103,39 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
   try {
     const token = await getAccessToken();
 
-    // FIXED: Use only the subfolder name for the filename, not the full path
-    const parts = folderName.split('/');
-    // Get just the subfolder name (last part of the path)
-    const subfolderName = parts[parts.length - 1];
-    // Replace spaces with underscores in the subfolder name
-    const fileNameBase = subfolderName.replace(/ /g, '_');
-    const excelFileName = `${fileNameBase}_equipment_data.xlsx`;
+    // First, list all files in the folder to find the most recent Excel file
+    const folderUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}:/children`;
+    const folderResponse = await axios.get(folderUrl, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-    console.log('Looking for Excel file:', excelFileName);
+    // Filter for Excel files and find the most recent one
+    const excelFiles = folderResponse.data.value
+      .filter(item => 
+        item.file && 
+        item.name.toLowerCase().endsWith('.xlsx') &&
+        item.name.includes('_equipment_data')
+      )
+      .sort((a, b) => new Date(b.lastModifiedDateTime) - new Date(a.lastModifiedDateTime));
 
-    const fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
+    let excelFileName;
+    let fileUrl;
 
-    console.log('OneDrive file URL:', fileUrl);
+    if (excelFiles.length === 0) {
+      // If no existing files found, use the standard filename pattern
+      const parts = folderName.split('/');
+      const subfolderName = parts[parts.length - 1];
+      const fileNameBase = subfolderName.replace(/ /g, '_');
+      excelFileName = `${fileNameBase}_equipment_data.xlsx`;
+      fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/root:/${ONEDRIVE_FOLDER_PATH}/${folderName}/${excelFileName}:/content`;
+    } else {
+      // Get the most recent Excel file
+      const mostRecentFile = excelFiles[0];
+      excelFileName = mostRecentFile.name;
+      fileUrl = `${GRAPH_ROOT}/users/${ONEDRIVE_USER}/drive/items/${mostRecentFile.id}/content`;
+    }
+
+    console.log('Loading Excel file:', excelFileName);
 
     const response = await axios.get(fileUrl, {
       headers: { Authorization: `Bearer ${token}` },
@@ -141,7 +162,6 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
     }
 
     // Extract data rows starting from row 7 (index 6)
-    // FIXED: Remove the header option to prevent treating data as headers
     const jsonData = xlsx.utils.sheet_to_json(sheet, { 
       range: 6, // Start from row 7 (0-indexed row 6)
       defval: ''
@@ -151,13 +171,17 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
     const filteredData = jsonData.map(row => {
       // Get the values from each column
       const values = Object.values(row);
+      // Check if the row has a "Selected" column and convert "Yes"/"No" to boolean
+      const hasSelectedColumn = values.length > 5;
+      const selectedValue = hasSelectedColumn ? (values[5] === 'Yes') : false;
+      
       return {
         device_type: values[0] || '',
         manufacturer: values[1] || '',
         model: values[2] || '',
         serial: values[3] || '',
         notes: values[4] || '',
-        selected: false
+        selected: selectedValue
       };
     }).filter(row => 
       row.device_type || row.manufacturer || row.model || row.serial
@@ -181,7 +205,8 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
       details: err.message
     });
   }
-});app.post('/api/save-excel', requireLogin, async (req, res) => {
+});
+app.post('/api/save-excel', requireLogin, async (req, res) => {
   try {
     const { folderName, headerRows, rows } = req.body;
     if (!folderName || !rows || !Array.isArray(rows)) {
