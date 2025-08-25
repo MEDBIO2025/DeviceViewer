@@ -181,8 +181,7 @@ app.get('/api/excel-data', requireLogin, async (req, res) => {
       details: err.message
     });
   }
-});
-app.post('/api/save-excel', requireLogin, async (req, res) => {
+});app.post('/api/save-excel', requireLogin, async (req, res) => {
   try {
     const { folderName, headerRows, rows } = req.body;
     if (!folderName || !rows || !Array.isArray(rows)) {
@@ -200,23 +199,43 @@ app.post('/api/save-excel', requireLogin, async (req, res) => {
     // Create the Excel workbook with proper structure
     const wb = xlsx.utils.book_new();
     
-    // Create the worksheet data array
+    // Create the worksheet data array with proper structure
     const ws_data = [];
     
-    // Add header rows if provided, otherwise use default
-    if (headerRows && Array.isArray(headerRows)) {
-      headerRows.forEach(row => ws_data.push(row));
-    } else {
-      // Default header structure
-      ws_data.push(['', '', 'Medical Center', 'BioMedix Engineering Inc']);
-      ws_data.push(['', '', '123 Main Street', '2030 Bristol Circle, Suite 210']);
-      ws_data.push(['', '', 'Suite 100', 'Oakville, ON L6H 6P5']);
-      ws_data.push(['', '', 'N/A', 'Ph.: 416-875-1407']);
-      ws_data.push([]);
-      ws_data.push(['Device Type', 'Manufacturer', 'Model', 'Serial Number', 'Notes', 'Selected']);
+    // Rows 1-4: Client and Biomedix info
+    // Row 1
+    ws_data.push(['', '', '', '', '']);
+    // Row 2 - Client info in C2, Biomedix in D2
+    ws_data.push(['', '', '', '', '']);
+    // Row 3 - Client info in C3, Biomedix in D3  
+    ws_data.push(['', '', '', '', '']);
+    // Row 4 - Client info in C4, Biomedix in D4
+    ws_data.push(['', '', '', '', '']);
+    // Row 5 - Client info in C5, Biomedix in D5
+    ws_data.push(['', '', '', '', '']);
+    
+    // Add client information from headerRows if available
+    if (headerRows && Array.isArray(headerRows) && headerRows.length >= 4) {
+      // Client info in column C (rows 2-5)
+      ws_data[1][2] = headerRows[0][2] || ''; // C2
+      ws_data[2][2] = headerRows[1][2] || ''; // C3
+      ws_data[3][2] = headerRows[2][2] || ''; // C4
+      ws_data[4][2] = headerRows[3][2] || ''; // C5
     }
     
-    // Add data rows
+    // Add BioMedix information in column D (rows 2-5)
+    ws_data[1][3] = 'BioMedix Engineering Inc';     // D2
+    ws_data[2][3] = '2030 Bristol Circle, Suite 210'; // D3
+    ws_data[3][3] = 'Oakville, ON L6H 6P5';         // D4
+    ws_data[4][3] = 'Ph.: 416-875-1407';            // D5
+    
+    // Empty row (row 6)
+    ws_data.push(['', '', '', '', '']);
+    
+    // Row 7: Column headers
+    ws_data.push(['Device Type', 'Manufacturer', 'Model', 'Serial Number', 'Notes', 'Selected']);
+    
+    // Add data rows starting from row 8
     rows.forEach(row => {
       ws_data.push([
         row.device_type || '',
